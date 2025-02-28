@@ -1,4 +1,5 @@
 package com.example.deliveryapp.order.entity;
 
-public class Order {
+
+public class Order  {
 }
