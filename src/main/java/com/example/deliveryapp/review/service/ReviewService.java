@@ -27,17 +27,19 @@ public class ReviewService {
     public ReviewSaveResponseDto save(ReviewSaveRequestDto dto) {
         Review review = new Review(dto.getStoreId(),
                 dto.getOrderId(),
-                dto.getMemberId(),
+                dto.getId(),
                 dto.getScore(),
                 dto.getContent()
                 );
         Review savedReview = reviewRepository.save(review);
-        return new ReviewSaveResponseDto(savedReview.getContent(),
+        return new ReviewSaveResponseDto(savedReview.getId(),
+                savedReview.getContent(),
                 savedReview.getScore(),
                 savedReview.getCreatedAt()
         );
     }
 
+    @Transactional(readOnly = false)
     public List<ReviewResponseDto> findAll() {
 
         List<Review> reviews = reviewRepository.findAll();
@@ -58,10 +60,11 @@ public class ReviewService {
         return dtos;
     }
 
+    @Transactional
     public ReviewUpdateResponseDto update(ReviewUpdateRequestDto dto, Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
-        review.update(dto.getContent());
+        review.update(dto.getContent(), dto.getScore());
         return  new ReviewUpdateResponseDto(review.getId(),
                 review.getStoreId(),
                 review.getOrderId(),
@@ -72,6 +75,7 @@ public class ReviewService {
 
     }
 
+    @Transactional
     public void deleteById(Long id) {
             if (!reviewRepository.existsById(id)) {
                 throw new IllegalArgumentException("삭제할 리뷰가 없습니다.");
@@ -79,4 +83,4 @@ public class ReviewService {
             reviewRepository.deleteById(id);
         }
     }
-}
+
