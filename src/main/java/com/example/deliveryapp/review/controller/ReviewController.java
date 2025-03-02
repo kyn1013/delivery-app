@@ -29,8 +29,16 @@ public class ReviewController {
     }
 
     @PatchMapping("/api/v1/review/{id}")
-    public ResponseEntity<ReviewUpdateResponseDto> update (@RequestBody ReviewUpdateRequestDto dto, @PathVariable Long id) {
+    public ResponseEntity<ReviewUpdateResponseDto> update (
+            @RequestBody ReviewUpdateRequestDto dto,
+            @PathVariable Long id
+    ) {
         return ResponseEntity.ok(reviewService.update(dto, id));
+    }
+
+    @DeleteMapping("/api/v1/review/{id}")
+    public void delete(@PathVariable Long id) {
+        reviewService.deleteById(id);
     }
 
 }
