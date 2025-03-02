@@ -8,6 +8,7 @@ import com.example.deliveryapp.auth.dto.response.SignupResponseDto;
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.auth.service.AuthService;
 import com.example.deliveryapp.common.annotation.Auth;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,7 +24,7 @@ public class AuthController {
 
     //회원가입
     @PostMapping("/api/v1/auth/users/signup")
-    public ResponseEntity<SignupResponseDto> Signup(@RequestBody SignupRequestDto dto) {
+    public ResponseEntity<SignupResponseDto> Signup(@Valid @RequestBody SignupRequestDto dto) {
         SignupResponseDto signupUser = authService.signup(dto);
         return ResponseEntity.ok(signupUser);
     }
@@ -37,7 +38,7 @@ public class AuthController {
 
     //로그인
     @PostMapping("/api/v1/auth/users/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto dto) {
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {
         LoginResponseDto loginUser = authService.login(dto);
         return ResponseEntity.ok(loginUser);
     }
