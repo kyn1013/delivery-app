@@ -19,21 +19,21 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/api/v1/reviews")
-    public ResponseEntity<ReviewSaveResponseDto> save (@RequestBody ReviewSaveRequestDto dto) {
-        return ResponseEntity.ok(reviewService.save(dto));
+    public ResponseEntity<ReviewSaveResponseDto> save (@RequestBody ReviewSaveRequestDto dto /*, Long userId, Long storeId, Long orderId */) {
+        return ResponseEntity.ok(reviewService.save(/* userId, storeId, orderId, */ dto));
     }
 
     @GetMapping("/api/v1/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> findAll() {
-        return ResponseEntity.ok(reviewService.findAll());
+    public ResponseEntity<List<ReviewResponseDto>> findAll(/* Long userId, Long storeId, Long orderId */) {
+        return ResponseEntity.ok(reviewService.findAll(/* userId, storeId, orderId */));
     }
 
     @PatchMapping("/api/v1/review/{id}")
     public ResponseEntity<ReviewUpdateResponseDto> update (
             @RequestBody ReviewUpdateRequestDto dto,
-            @PathVariable Long id
+            @PathVariable /* Long storeId, Long orderId, */ Long id
     ) {
-        return ResponseEntity.ok(reviewService.update(dto, id));
+        return ResponseEntity.ok(reviewService.update(/* storeId, orderId, */ dto, id));
     }
 
     @DeleteMapping("/api/v1/review/{id}")
