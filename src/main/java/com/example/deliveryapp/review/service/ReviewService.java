@@ -71,4 +71,12 @@ public class ReviewService {
         );
 
     }
+
+    public void deleteById(Long id) {
+            if (!reviewRepository.existsById(id)) {
+                throw new IllegalArgumentException("삭제할 리뷰가 없습니다.");
+            }
+            reviewRepository.deleteById(id);
+        }
+    }
 }
