@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+import static com.example.deliveryapp.menu.enums.MenuStatus.*;
+
 @Entity
 @Table(name = "menu")
 @NoArgsConstructor
@@ -24,11 +26,11 @@ public class Menu extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal price;
-
     private String menuName;
 
-    @Enumerated(EnumType.STRING)
+    private BigDecimal price;
+
+    @Enumerated
     private MenuCategory menuCategory;
 
     @Enumerated(EnumType.STRING)
@@ -38,9 +40,31 @@ public class Menu extends BaseEntity {
     @JoinColumn(name ="store_id")
     private Store store;
 
+    private Integer salesCount;
+
     private Integer stockQuantity;
 
     private String description;
 
+    @PrePersist
+    public void PrePersist() {
+        this.salesCount = salesCount == null ? 0 : this.salesCount; // 판매량 기본값 0, 처음 저장시 0
+        this.menuStatus = menuStatus == null ? INACTIVE : menuStatus; // 메뉴 상태 기본값 INACTIVE
+    }
 
+    @Builder
+    public Menu(String menuName, BigDecimal price, MenuCategory menuCategory,
+                MenuStatus menuStatus, Integer stockQuantity, String description) {
+        this.menuName = menuName;
+        this.price = price;
+        this.menuCategory = menuCategory;
+        this.menuStatus = menuStatus;
+        this.stockQuantity = stockQuantity;
+        this.description = description;
+    }
+
+    public void simpleUpdate(MenuStatus menuStatus, Integer stockQuantity) {
+        this.menuStatus = menuStatus;
+        this.stockQuantity = stockQuantity;
+    }
 }
