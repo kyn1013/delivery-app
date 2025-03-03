@@ -3,8 +3,10 @@ package com.example.deliveryapp.review.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ReviewSaveRequestDto {
 
     @NotBlank(message = "내용을 입력하세요.")
