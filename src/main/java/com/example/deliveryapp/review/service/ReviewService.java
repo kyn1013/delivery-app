@@ -28,7 +28,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
 //    private final OrderRepository orderRepository; //주문 정보 가져오기 위함
 
-    // 리뷰 저장
     @Transactional
     public ReviewSaveResponseDto save(/* Long userId, Long storeId, Long orderId, */ ReviewSaveRequestDto dto) {
         /* User user = User.fromUserId(userId);
