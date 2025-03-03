@@ -33,4 +33,9 @@ public class Cart extends BaseEntity {
         this.quantity = quantity;
     }
 
+    public void update(PMenu menu, Long quantity){
+        this.PMenu = menu;
+        this.quantity = quantity;
+    }
+
 }
