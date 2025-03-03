@@ -28,6 +28,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
 //    private final OrderRepository orderRepository; //주문 정보 가져오기 위함
 
+    // 리뷰 저장
     @Transactional
     public ReviewSaveResponseDto save(/* Long userId, Long storeId, Long orderId, */ ReviewSaveRequestDto dto) {
         /* User user = User.fromUserId(userId);
@@ -42,7 +43,7 @@ public class ReviewService {
             // 주문 상태 체크: 완료된 주문만 리뷰 작성 가능
             if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new IllegalStateException("배달 완료된 주문만 리뷰를 작성할 수 있습니다.");
-            } */ // order 구현 뒤 제거..
+            } */ // order 구현 뒤 주석 제거
         Review review = new Review(/* user,
                 store,
                 order, */
@@ -60,6 +61,7 @@ public class ReviewService {
         );
     }
 
+    // 리뷰 조회
     @Transactional(readOnly = false)
     public List<ReviewResponseDto> findAll(/* Long userId, Long storeId, Long orderId */) {
         /* User user = User.fromUserId(userId);
@@ -87,6 +89,7 @@ public class ReviewService {
         return dtos;
     }
 
+    // 리뷰 수정
     @Transactional
     public ReviewUpdateResponseDto update(/* Long storeId, Long orderId, */ ReviewUpdateRequestDto dto, Long id) {
        /* Store store = Store.fromStoreId(storeId);
@@ -94,6 +97,12 @@ public class ReviewService {
 
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+
+        //작성자 검증
+        /* if (!review.getUser().getId().equals(userid)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_POST_UPDATE);
+        } */ // 회원가입 구현후에 주석 제거
+
         review.update(dto.getContent(), dto.getScore());
         return  new ReviewUpdateResponseDto(review.getId(),
                /*  store.getId(),
@@ -105,6 +114,7 @@ public class ReviewService {
 
     }
 
+    // 리뷰 삭제
     @Transactional
     public void deleteById(Long id) {
             if (!reviewRepository.existsById(id)) {

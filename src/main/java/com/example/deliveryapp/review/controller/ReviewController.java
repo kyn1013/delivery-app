@@ -18,16 +18,19 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    // 리뷰 작성
     @PostMapping("/api/v1/reviews")
     public ResponseEntity<ReviewSaveResponseDto> save (@RequestBody ReviewSaveRequestDto dto /*, Long userId, Long storeId, Long orderId */) {
         return ResponseEntity.ok(reviewService.save(/* userId, storeId, orderId, */ dto));
     }
 
+    // 리뷰 조회
     @GetMapping("/api/v1/reviews")
     public ResponseEntity<List<ReviewResponseDto>> findAll(/* Long userId, Long storeId, Long orderId */) {
         return ResponseEntity.ok(reviewService.findAll(/* userId, storeId, orderId */));
     }
 
+    // 리뷰 수정
     @PatchMapping("/api/v1/review/{id}")
     public ResponseEntity<ReviewUpdateResponseDto> update (
             @RequestBody ReviewUpdateRequestDto dto,
@@ -36,6 +39,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.update(/* storeId, orderId, */ dto, id));
     }
 
+    // 리뷰 삭제
     @DeleteMapping("/api/v1/review/{id}")
     public void delete(@PathVariable Long id) {
         reviewService.deleteById(id);
