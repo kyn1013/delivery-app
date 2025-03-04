@@ -16,8 +16,6 @@ public class OrderDetail extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long quantity;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
     private PMenu PMenu;
@@ -25,4 +23,13 @@ public class OrderDetail extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    private Long quantity;
+
+    public OrderDetail(PMenu PMenu, Order order, Long quantity) {
+        this.PMenu = PMenu;
+        this.order = order;
+        this.quantity = quantity;
+    }
+
 }
