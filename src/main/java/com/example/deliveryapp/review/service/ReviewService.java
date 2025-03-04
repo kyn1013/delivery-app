@@ -1,7 +1,5 @@
 package com.example.deliveryapp.review.service;
 
-import com.example.deliveryapp.common.exception.errorcode.CustomException;
-import com.example.deliveryapp.order.entity.Order;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
 import com.example.deliveryapp.review.dto.request.ReviewSaveRequestDto;
@@ -9,8 +7,6 @@ import com.example.deliveryapp.review.dto.response.ReviewSaveResponseDto;
 import com.example.deliveryapp.review.dto.response.ReviewUpdateResponseDto;
 import com.example.deliveryapp.review.entity.Review;
 import com.example.deliveryapp.review.repository.ReviewRepository;
-import com.example.deliveryapp.store.entity.Store;
-import com.example.deliveryapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -18,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.deliveryapp.common.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -95,7 +89,7 @@ public class ReviewService {
         Order order = Order.fromOrderId(orderId); */
 
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+                .orElseThrow(() -> new IllegalStateException("일차하는 정보가 없습니다."));
 
         //작성자 검증
         /* if (!review.getUser().getId().equals(userid)) {
@@ -119,6 +113,11 @@ public class ReviewService {
             if (!reviewRepository.existsById(id)) {
                 throw new IllegalArgumentException("삭제할 리뷰가 없습니다.");
             }
+
+        //작성자 검증
+        /* if (!review.getUser().getId().equals(userid)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_POST_DELETE);
+        } */ // 회원가입 구현후에 주석 제거
             reviewRepository.deleteById(id);
         }
     }

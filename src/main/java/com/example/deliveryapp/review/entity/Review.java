@@ -68,7 +68,7 @@ public class Review extends BaseEntity {
         return new Store(id); // Store 엔티티가 구현되면 해당 ID를 기준으로 객체 생성
     }
 
-    // 3. Order 엔티티의 ID로 Order 객체 생성 (추후 Order 엔티티가 완성되면 삭제)
+     3. Order 엔티티의 ID로 Order 객체 생성 (추후 Order 엔티티가 완성되면 삭제)
     public static Order fromOrderId(Long id) {
         return new Order(id); // Order 엔티티가 구현되면 해당 ID를 기준으로 객체 생성
     }
