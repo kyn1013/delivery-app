@@ -109,7 +109,15 @@ public class OrderService {
 
     @Transactional
     public OrderInfoResponseDto cancelOrder(Long orderId) {
-        return null;
+        Order order = orderRepository.findByOrderId(orderId);
+        order.update("주문취소");
+        OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
+                .orderId(order.getId())
+                .memberName(order.getMember().getName())
+                .storeName(order.getStore().getName())
+                .state(order.getState())
+                .build();
+        return orderInfoResponseDto;
     }
 
     @Transactional
@@ -122,6 +130,45 @@ public class OrderService {
                                             .storeName(order.getStore().getName())
                                             .state(order.getState())
                                             .build();
+        return orderInfoResponseDto;
+    }
+
+    @Transactional
+    public OrderInfoResponseDto rejectOrder(Long orderId) {
+        Order order = orderRepository.findByOrderId(orderId);
+        order.update("주문거절");
+        OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
+                .orderId(order.getId())
+                .memberName(order.getMember().getName())
+                .storeName(order.getStore().getName())
+                .state(order.getState())
+                .build();
+        return orderInfoResponseDto;
+    }
+
+    @Transactional
+    public OrderInfoResponseDto deliveringOrder(Long orderId) {
+        Order order = orderRepository.findByOrderId(orderId);
+        order.update("배달중");
+        OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
+                .orderId(order.getId())
+                .memberName(order.getMember().getName())
+                .storeName(order.getStore().getName())
+                .state(order.getState())
+                .build();
+        return orderInfoResponseDto;
+    }
+
+    @Transactional
+    public OrderInfoResponseDto completeOrder(Long orderId) {
+        Order order = orderRepository.findByOrderId(orderId);
+        order.update("배달완료");
+        OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
+                .orderId(order.getId())
+                .memberName(order.getMember().getName())
+                .storeName(order.getStore().getName())
+                .state(order.getState())
+                .build();
         return orderInfoResponseDto;
     }
 }

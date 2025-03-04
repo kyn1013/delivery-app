@@ -1,6 +1,5 @@
 package com.example.deliveryapp.order.controller;
 
-
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
 import com.example.deliveryapp.order.service.OrderService;
@@ -51,12 +50,11 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 손님 : 주문 취소
      */
-    @PatchMapping("/accept/{orderId}")
+    @PatchMapping("/cancel/{orderId}")
     public ResponseEntity<OrderInfoResponseDto> cancelOrder(@PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.cancelOrder(orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
-
 
     /*
      * 주문 상태 변경 - 사장님 : 주문 수락
@@ -64,6 +62,33 @@ public class OrderController {
     @PatchMapping("/accept/{orderId}")
     public ResponseEntity<OrderInfoResponseDto> acceptOrder(@PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.acceptOrder(orderId);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    /*
+     * 주문 상태 변경 - 사장님 : 주문 거절
+     */
+    @PatchMapping("/reject/{orderId}")
+    public ResponseEntity<OrderInfoResponseDto> rejectOrder(@PathVariable Long orderId){
+        OrderInfoResponseDto responseDto = orderService.rejectOrder(orderId);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    /*
+     * 주문 상태 변경 - 사장님 : 배달중
+     */
+    @PatchMapping("/delivering/{orderId}")
+    public ResponseEntity<OrderInfoResponseDto> deliveringOrder(@PathVariable Long orderId){
+        OrderInfoResponseDto responseDto = orderService.deliveringOrder(orderId);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    /*
+     * 주문 상태 변경 - 사장님 : 배달완료
+     */
+    @PatchMapping("/complete/{orderId}")
+    public ResponseEntity<OrderInfoResponseDto> completeOrder(@PathVariable Long orderId){
+        OrderInfoResponseDto responseDto = orderService.completeOrder(orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
