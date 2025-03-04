@@ -100,7 +100,7 @@ public class MenuService {
     @Transactional
     public void deleteAll(Long storeId) {
         // StoreId로 메뉴 상태가 'AVAILABLE' or 'INACTIVE' 인 메뉴 모두 조회
-        List<Menu> menus = menuRepository.findAllByStoreIdAndStatusNot(
+        List<Menu> menus = menuRepository.findAllByStoreIdAndMenuStatusNot(
                 storeId, MenuStatus.DELETED);
 
         if (menus.isEmpty()) {

@@ -21,7 +21,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
             " m.menuStatus = 'AVAILABLE' ORDER BY m.menuCategory, m.salesCount DESC ")
     List<Menu> findByStoreIdOrderByCategoryActiveOnly(Long storeId);
 
-    List<Menu> findAllByStoreIdAndStatusNot(Long storeId, MenuStatus status);
+    List<Menu> findAllByStoreIdAndMenuStatusNot(Long storeId, MenuStatus status);
 
     boolean existsByStoreIdAndMenuName(Long storeId, String menuName);
 }
