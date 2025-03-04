@@ -3,7 +3,6 @@ package com.example.deliveryapp.menu.dto.response;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuCategory;
 import com.example.deliveryapp.menu.enums.MenuStatus;
-import com.example.deliveryapp.store.entity.Store;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MenuDetailResponseDto {
+public class MenuResponseDto {
 
     private final Long id;
     private final String menuName;
@@ -27,8 +26,8 @@ public class MenuDetailResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public static MenuDetailResponseDto toDto(Menu menu) {
-        return MenuDetailResponseDto.builder()
+    public static MenuResponseDto toDto(Menu menu) {
+        return MenuResponseDto.builder()
                 .id(menu.getId())
                 .menuName(menu.getMenuName())
                 .price(menu.getPrice())

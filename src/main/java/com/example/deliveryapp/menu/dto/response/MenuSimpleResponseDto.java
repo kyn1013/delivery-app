@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MenuSimpleResponseDto {
 
-    private Long id;
+    private final Long id;
     private final String menuName;
     private final BigDecimal price;
     private final MenuCategory menuCategory;

@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
-public class MenuCreateRequestDto {
+public class MenuRequestDto {
 
     private String menuName;
 
