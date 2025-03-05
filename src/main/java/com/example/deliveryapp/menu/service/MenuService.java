@@ -1,4 +1,114 @@
 package com.example.deliveryapp.menu.service;
 
+import com.example.deliveryapp.menu.dto.request.MenuRequestDto;
+import com.example.deliveryapp.menu.dto.request.MenuSimpleUpdateRequestDto;
+import com.example.deliveryapp.menu.dto.response.MenuResponseDto;
+import com.example.deliveryapp.menu.dto.response.MenuSimpleResponseDto;
+import com.example.deliveryapp.menu.entity.Menu;
+import com.example.deliveryapp.menu.enums.MenuStatus;
+import com.example.deliveryapp.menu.repository.MenuRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
 public class MenuService {
+
+    private final MenuRepository menuRepository;
+
+    @Transactional
+    public MenuSimpleResponseDto saveMenu(MenuRequestDto dto, Long storeId) {
+
+        // 해당 스토어에 중복된 메뉴 이름 검증.
+        if (menuRepository.existsByStoreIdAndMenuName(storeId,dto.getMenuName())) {
+            throw new IllegalArgumentException("Menu already exists");
+        }
+
+        Menu menu = new Menu(
+                dto.getMenuName(),
+                dto.getPrice(),
+                dto.getMenuCategory(),
+                dto.getMenuStatus(),
+                dto.getStockQuantity(),
+                dto.getDescription()
+        );
+
+        Menu savedMenu = menuRepository.save(menu);
+        return MenuSimpleResponseDto.toDto(savedMenu);
+    }
+
+    // 가게 메뉴 페이지 to 클라이언트
+    @Transactional(readOnly = true)
+    public List<MenuSimpleResponseDto> findAvailableMenusByStoreId(Long storeId) {
+        List<Menu> menus = menuRepository.findByStoreIdOrderByCategoryActiveOnly(storeId);
+        return menus.stream().map(MenuSimpleResponseDto::toDto)
+                .collect(Collectors.toList());
+    }
+
+    // 가게 메뉴 페이지 to 사장님
+    @Transactional(readOnly = true)
+    public List<MenuResponseDto> findAllMenusByStoreId(Long storeId) {
+        List<Menu> menus = menuRepository.findByStoreIdOrderByCategory(storeId);
+        return menus.stream().map(MenuResponseDto::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MenuSimpleResponseDto updateMenuSimple(MenuSimpleUpdateRequestDto dto, Long menuId) {
+        Menu menu = menuRepository.findById(menuId).orElseThrow(
+                () -> new IllegalArgumentException("Menu not found")
+        );
+
+        menu.simpleUpdate(
+                dto.getMenuStatus(),
+                dto.getStockQuantity()
+        );
+
+        return MenuSimpleResponseDto.toDto(menuRepository.save(menu));
+    }
+
+    @Transactional
+    public MenuResponseDto updateMenuDetail(MenuRequestDto dto, Long menuId) {
+        Menu menu = menuRepository.findById(menuId).orElseThrow(
+                () -> new IllegalArgumentException("Menu not found")
+        );
+
+        menu.update(
+                dto.getMenuName(),
+                dto.getPrice(),
+                dto.getMenuCategory(),
+                dto.getMenuStatus(),
+                dto.getStockQuantity(),
+                dto.getDescription()
+        );
+        return MenuResponseDto.toDto(menuRepository.save(menu));
+    }
+
+    @Transactional
+    public void delete(Long menuId) {
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new IllegalArgumentException("Menu not found"));
+
+        menu.delete(); // 'DELETED'로 변경
+        menuRepository.save(menu); // 변경 내용 저장
+    }
+
+    @Transactional
+    public void deleteAll(Long storeId) {
+        // StoreId로 메뉴 상태가 'AVAILABLE' or 'INACTIVE' 인 메뉴 모두 조회
+        List<Menu> menus = menuRepository.findAllByStoreIdAndMenuStatusNot(
+                storeId, MenuStatus.DELETED);
+
+        if (menus.isEmpty()) {
+            throw new IllegalArgumentException("Menu not found");
+        }
+
+        menus.forEach(Menu::delete);
+        menuRepository.saveAll(menus);
+    }
+
 }
