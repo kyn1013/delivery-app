@@ -1,13 +1,18 @@
 package com.example.deliveryapp.order.entity;
 
-
 import com.example.deliveryapp.common.entity.BaseEntity;
-import com.example.deliveryapp.order.pratice_entity.Member;
-import com.example.deliveryapp.order.pratice_entity.Store;
-import jakarta.persistence.*;
-import lombok.Builder;
+import com.example.deliveryapp.store.entity.Store;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import com.example.deliveryapp.order.pratice_entity.Member;
+import jakarta.persistence.*;
+import lombok.Builder;
+
 
 @Getter
 @Entity
@@ -39,8 +44,9 @@ public class Order extends BaseEntity {
         this.state = state;
     }
 
-    public void update(String state){
+    public void update(String state) {
         this.state = state;
     }
-
 }
+
+

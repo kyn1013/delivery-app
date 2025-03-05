@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
+@Entity
 @NoArgsConstructor
 public class User extends BaseEntity {
 
@@ -70,4 +70,5 @@ public class User extends BaseEntity {
         this.password = newPassword;
     }
 }
+
 
