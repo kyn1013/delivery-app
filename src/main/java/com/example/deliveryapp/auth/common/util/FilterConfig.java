@@ -1,5 +1,8 @@
 package com.example.deliveryapp.auth.common.util;
 
+import com.example.deliveryapp.auth.repository.BlackListRepository;
+import com.example.deliveryapp.auth.repository.RefreshTokenRepository;
+import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
