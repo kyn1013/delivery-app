@@ -18,7 +18,7 @@ public class OrderController {
     private final OrderService orderService;
 
     /*
-     * 주문 등록하기
+     * 주문 등록하기 / 주문 상태 변경 - 손님 : 주문 요청
      */
     @PostMapping("/{userId}")
     public ResponseEntity<OrderResponseDto> save(@PathVariable Long userId){
