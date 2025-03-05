@@ -9,6 +9,7 @@ import com.example.deliveryapp.review.dto.response.ReviewSaveResponseDto;
 import com.example.deliveryapp.review.dto.response.ReviewUpdateResponseDto;
 import com.example.deliveryapp.review.entity.Review;
 import com.example.deliveryapp.review.repository.ReviewRepository;
+import com.example.deliveryapp.store.entity.Store;
 import com.example.deliveryapp.store.repository.StoreRepository;
 import com.example.deliveryapp.user.entity.User;
 import com.example.deliveryapp.user.repository.UserRepository;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.deliveryapp.common.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -28,7 +31,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
 //  private final OrderRepository orderRepository; //주문 정보 가져오기 위함
-//  private final StoreRepository storeRepository; //가게 정보 가져오기 위함
+    private final StoreRepository storeRepository; //가게 정보 가져오기 위함
 
     @Transactional
     public ReviewSaveResponseDto save(ReviewSaveRequestDto dto) {
@@ -38,18 +41,20 @@ public class ReviewService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         /* Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));*/
 
-       /* Store store = storeRepository.findById(storeId)
+        Long storeId = dto.getStoreId();
+
+        Store store = storeRepository.findById(storeId)
                     .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
 
             // 주문 상태 체크: 완료된 주문만 리뷰 작성 가능
-            if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
+           /* if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new IllegalStateException("배달 완료된 주문만 리뷰를 작성할 수 있습니다.");
             } */ // order 구현 뒤 주석 제거
         Review review = new Review(user,
-                /*store,
-                order, */
+                store,
+//                order,
                 dto.getScore(),
                 dto.getContent()
                 );
@@ -58,8 +63,8 @@ public class ReviewService {
         return new ReviewSaveResponseDto(
                 savedReview.getId(),
                 user.getId(),
-                /* store.getId(),
-                order.getId(), */
+                store.getId(),
+//                order.getId(),
                 savedReview.getContent(),
                 savedReview.getScore(),
                 savedReview.getCreatedAt()
@@ -78,8 +83,8 @@ public class ReviewService {
         for (Review review : reviews) {
             ReviewResponseDto dto = new ReviewResponseDto(review.getId(),
                    review.getUser().getId(),
-                    /* store.getId(),
-                    order.getId(), */
+                   review.getStore().getId(),
+//                 review.getOrder().getId(),
                     review.getScore(),
                     review.getContent(),
                     review.getCreatedAt(),
@@ -104,8 +109,8 @@ public class ReviewService {
 
         review.update(dto.getContent(), dto.getScore());
         return  new ReviewUpdateResponseDto(review.getId(),
-               /*  store.getId(),
-                order.getId(), */
+                review.getStore().getId(),
+//                review.getOrder().getId(),
                 review.getScore(),
                 review.getContent(),
                 review.getUpdatedAt()
@@ -115,20 +120,14 @@ public class ReviewService {
 
     @Transactional
     public void deleteById(Long id, Long userId) {
-        // 삭제 전 리뷰가 존재하는지 확인
-        Optional<Review> optionalReview = reviewRepository.findById(id);
+        // 리뷰 존재 여부 확인
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
-        if (optionalReview.isEmpty()) {
-            throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
-        }
-
-        Review review = optionalReview.get();
-
-        // 작성자 검증
+        //작성자 검증
         if (!review.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_DELETE);
         }
-
         // 리뷰 삭제
         reviewRepository.deleteById(id);
     }

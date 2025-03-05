@@ -1,6 +1,7 @@
 package com.example.deliveryapp.review.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
+import com.example.deliveryapp.store.entity.Store;
 import com.example.deliveryapp.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,11 +21,11 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-   /* @ManyToOne(fetch = FetchType.LAZY)
+   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order; */
 
@@ -36,13 +37,13 @@ public class Review extends BaseEntity {
     private String content;
 
     public Review(User user,
-                  /* Store store,
-                  Order order, */
+                  Store store,
+            /* Order order, */
                   int score,
                   String content) {
         this.user = user;
-        /* this.store = store;
-        this.order = order; */
+        this.store = store;
+//        this.order = order;
         this.score = score;
         this.content = content;
     }
