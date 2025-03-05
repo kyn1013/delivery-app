@@ -52,7 +52,7 @@ public class ReviewController {
     @DeleteMapping("/api/v1/review/{id}")
     public void delete(@Auth AuthUser user, // JWT 토큰 검증
                        @PathVariable Long id) {
-        reviewService.deleteById(user.getId(), id);
+        reviewService.deleteById(id, user.getId());
     }
 
 }

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -112,19 +113,24 @@ public class ReviewService {
 
     }
 
-    // 리뷰 삭제
-
+    @Transactional
     public void deleteById(Long id, Long userId) {
-        // 리뷰 존재 여부 확인
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+        // 삭제 전 리뷰가 존재하는지 확인
+        Optional<Review> optionalReview = reviewRepository.findById(id);
 
-        //작성자 검증
+        if (optionalReview.isEmpty()) {
+            throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+
+        Review review = optionalReview.get();
+
+        // 작성자 검증
         if (!review.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_DELETE);
         }
+
         // 리뷰 삭제
         reviewRepository.deleteById(id);
-        }
+    }
     }
 
