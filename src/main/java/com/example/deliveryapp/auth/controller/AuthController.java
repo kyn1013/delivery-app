@@ -84,8 +84,8 @@ public class AuthController {
     }
 
 
-    //탈퇴한 사용자의 refresh Token 관리
-    //Refresh Token이 만료된 경우에는..?
+    //탈퇴한 사용자의 refresh Token 관리 -> 걍 생각할 필요 없는 것 같음
+    //Refresh Token이 만료된 경우에는..? ->
 
 
 }
