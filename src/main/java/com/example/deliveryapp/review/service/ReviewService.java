@@ -113,7 +113,7 @@ public class ReviewService {
     }
 
     // 리뷰 삭제
-    @Transactional
+
     public void deleteById(Long id, Long userId) {
         // 리뷰 존재 여부 확인
         Review review = reviewRepository.findById(id)

@@ -23,7 +23,7 @@ public class ReviewController {
     // 리뷰 작성
     @PostMapping("/api/v1/reviews")
     public ResponseEntity<ReviewSaveResponseDto> save (
-            @Auth AuthUser user,
+            @Auth AuthUser user, // JWT 토큰 검증
             @RequestBody ReviewSaveRequestDto dto
     ) {
         Long userId = user.getId();

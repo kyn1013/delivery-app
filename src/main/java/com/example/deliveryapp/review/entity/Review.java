@@ -1,15 +1,10 @@
 package com.example.deliveryapp.review.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
-import com.example.deliveryapp.order.entity.Order;
-import com.example.deliveryapp.store.entity.Store;
 import com.example.deliveryapp.user.entity.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
