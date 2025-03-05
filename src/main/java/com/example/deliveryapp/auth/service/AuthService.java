@@ -1,5 +1,6 @@
 package com.example.deliveryapp.auth.service;
 
+import com.example.deliveryapp.address.repository.AddressRepository;
 import com.example.deliveryapp.auth.common.encoder.PasswordEncoder;
 import com.example.deliveryapp.auth.common.exception.InvalidRequestException;
 import com.example.deliveryapp.auth.common.util.JwtUtil;
@@ -12,6 +13,7 @@ import com.example.deliveryapp.auth.entity.RefreshToken;
 import com.example.deliveryapp.auth.entity.RefreshTokenBlackList;
 import com.example.deliveryapp.auth.repository.BlackListRepository;
 import com.example.deliveryapp.auth.repository.RefreshTokenRepository;
+import com.example.deliveryapp.address.entity.Address;
 import com.example.deliveryapp.user.entity.User;
 import com.example.deliveryapp.user.enums.IsDeleted;
 import com.example.deliveryapp.user.enums.UserRole;
@@ -31,6 +33,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final BlackListRepository blackListRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AddressRepository addressRepository;
 
     @Transactional
     public SignupResponseDto signup(SignupRequestDto dto) {
@@ -45,6 +48,7 @@ public class AuthService {
         //객체 생성
         UserRole userRole = UserRole.of(dto.getUserRole());
         User newUser;
+        Address newAddress;
 
         //고객
         if(UserRole.ROLE_CUSTOMER.equals(userRole)) {
@@ -53,25 +57,31 @@ public class AuthService {
                     userRole,
                     dto.getEmail(),
                     encodedPassword,
-                    dto.getAddress(),
                     dto.getPhoneNumber()
             );
+            newAddress = new Address(newUser, dto.getAddress());
+            newAddress.setDefault(true);
         }else if(UserRole.ROLE_OWNER.equals(userRole)) {
             newUser = new User(
                     dto.getUserName(),
                     userRole,
                     dto.getEmail(),
                     encodedPassword,
-                    dto.getAddress(),
                     dto.getBrn(),
                     dto.getPhoneNumber()
             );
+            newAddress = new Address(newUser, dto.getAddress());
+            newAddress.setDefault(true);
         } else {
             throw new InvalidRequestStateException("유효하지 않은 사용자 역할입니다.");
         }
 
         //저장
+        Address savedAddress = addressRepository.save(newAddress);
         User savedUser = userRepository.save(newUser);
+
+        //처음 받아온 1개의 배송지를 기본 배송지로 설정
+        savedAddress.setDefault(true);
 
         return new SignupResponseDto(
                 savedUser.getId(),
@@ -79,7 +89,7 @@ public class AuthService {
                 savedUser.getUserRole(),
                 savedUser.getEmail(),
                 savedUser.getPassword(),
-                savedUser.getAddress(),
+                savedAddress.getAddress(),
                 savedUser.getBrn(), // `ROLE_CUSTOMER`일 경우 `null`로 설정됨
                 savedUser.getPhoneNumber()
         );

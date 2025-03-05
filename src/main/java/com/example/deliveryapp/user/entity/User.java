@@ -29,9 +29,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String address;
-
     private String brn; //사업자 등록 번호
 
     @Column(unique = true, nullable = false)
@@ -42,23 +39,21 @@ public class User extends BaseEntity {
     private IsDeleted isDeleted = IsDeleted.ACTIVE; //ACTIVE가 디폴트
 
     //사장님용 생성자
-    public User(String userName, UserRole userRole, String email, String password, String address, String brn, String phoneNumber) {
+    public User(String userName, UserRole userRole, String email, String password, String brn, String phoneNumber) {
         this.userName = userName;
         this.userRole = userRole;
         this.email = email;
         this.password = password;
-        this.address = address;
         this.brn = brn;
         this.phoneNumber = phoneNumber;
     }
 
     //고객용 생성자
-    public User(String userName, UserRole userRole, String email, String password, String address, String phoneNumber) {
+    public User(String userName, UserRole userRole, String email, String password, String phoneNumber) {
         this.userName = userName;
         this.userRole = userRole;
         this.email = email;
         this.password = password;
-        this.address = address;
         this.phoneNumber = phoneNumber;
     }
 
@@ -68,6 +63,10 @@ public class User extends BaseEntity {
 
     public void changePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void changeUsername(String userName) {
+        this.userName = userName;
     }
 }
 
