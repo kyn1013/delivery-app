@@ -1,5 +1,6 @@
 package com.example.deliveryapp.menu.repository;
 
+import com.example.deliveryapp.cart.entity.Cart;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +25,14 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     List<Menu> findByStoreIdOrderByCategoryActiveOnly(Long storeId);
 
     List<Menu> findAllByStoreIdAndMenuStatusNot(Long storeId, MenuStatus status);
+
+    boolean existsByStoreIdAndMenuName(Long storeId, String menuName);
+
+    // 메뉴와 가게를 함께 조회
+    @Query("SELECT m FROM Menu m " +
+            "LEFT JOIN FETCH m.store s " +
+            "WHERE m.id = :menuId")
+    Menu findByIdWithStore(@Param("menuId") Long menuId);
 
     boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
 }
