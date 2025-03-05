@@ -1,10 +1,12 @@
 package com.example.deliveryapp.order.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
-import com.example.deliveryapp.order.pratice_entity.PMenu;
+import com.example.deliveryapp.menu.entity.Menu;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Getter
 @Entity
@@ -18,7 +20,7 @@ public class OrderDetail extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
-    private PMenu PMenu;
+    private Menu menu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -26,10 +28,13 @@ public class OrderDetail extends BaseEntity {
 
     private Long quantity;
 
-    public OrderDetail(PMenu PMenu, Order order, Long quantity) {
-        this.PMenu = PMenu;
+    private BigDecimal price;
+
+    public OrderDetail(Menu menu, Order order, Long quantity, BigDecimal price) {
+        this.menu = menu;
         this.order = order;
         this.quantity = quantity;
+        this.price = price;
     }
 
 }

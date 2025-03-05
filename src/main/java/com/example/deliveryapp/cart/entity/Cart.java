@@ -1,8 +1,8 @@
 package com.example.deliveryapp.cart.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
-import com.example.deliveryapp.order.pratice_entity.Member;
-import com.example.deliveryapp.order.pratice_entity.PMenu;
+import com.example.deliveryapp.menu.entity.Menu;
+import com.example.deliveryapp.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,22 +19,22 @@ public class Cart extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
-    private PMenu PMenu;
+    private Menu menu;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private Long quantity;
 
-    public Cart(PMenu PMenu, Member member, Long quantity) {
-        this.PMenu = PMenu;
-        this.member = member;
+    public Cart(Menu menu, User user, Long quantity) {
+        this.menu = menu;
+        this.user = user;
         this.quantity = quantity;
     }
 
-    public void update(PMenu menu, Long quantity){
-        this.PMenu = menu;
+    public void update(Menu menu, Long quantity){
+        this.menu = menu;
         this.quantity = quantity;
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
 
     @Query("SELECT d FROM OrderDetail d " +
-            "LEFT JOIN FETCH d.PMenu m " +
+            "LEFT JOIN FETCH d.menu m " +
             "WHERE d.order.id = :orderId")
     List<OrderDetail> findByOrderId(@Param("orderId") Long orderId);
 

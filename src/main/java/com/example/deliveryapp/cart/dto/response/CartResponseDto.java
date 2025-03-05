@@ -28,10 +28,10 @@ public class CartResponseDto {
     public static Page<CartResponseDto> toResponsePage(Page<Cart> carts, Pageable pageable) {
         return carts.map(cart -> CartResponseDto.builder()
                 .cartId(cart.getId())
-                .menuId(cart.getPMenu().getId())
-                .menuName(cart.getPMenu().getName())
-                .memberId(cart.getMember().getId())
-                .memberName(cart.getMember().getName())
+                .menuId(cart.getMenu().getId())
+                .menuName(cart.getMenu().getMenuName())
+                .memberId(cart.getUser().getId())
+                .memberName(cart.getUser().getUserName())
                 .quantity(cart.getQuantity())
                 .build()
         );

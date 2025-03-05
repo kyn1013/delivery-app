@@ -5,10 +5,10 @@ import com.example.deliveryapp.cart.dto.request.CartUpdateRequestDto;
 import com.example.deliveryapp.cart.dto.response.CartResponseDto;
 import com.example.deliveryapp.cart.entity.Cart;
 import com.example.deliveryapp.cart.repository.CartRepository;
-import com.example.deliveryapp.order.practice_repository.MemberRepository;
-import com.example.deliveryapp.order.practice_repository.PMenuRepository;
-import com.example.deliveryapp.order.pratice_entity.Member;
-import com.example.deliveryapp.order.pratice_entity.PMenu;
+import com.example.deliveryapp.menu.entity.Menu;
+import com.example.deliveryapp.menu.repository.MenuRepository;
+import com.example.deliveryapp.user.entity.User;
+import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,22 +23,22 @@ import static com.example.deliveryapp.cart.dto.response.CartResponseDto.toRespon
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final MemberRepository memberRepository;
-    private final PMenuRepository pMenuRepository;
+    private final UserRepository userRepository;
+    private final MenuRepository menuRepository;
 
     @Transactional
     public CartResponseDto save(CartSaveRequestDto requestDto) {
-        Member member = memberRepository.findById(requestDto.getMemberId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
-        PMenu menu = pMenuRepository.findById(requestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
-        Cart cart = new Cart(menu, member, requestDto.getQuantity());
+        User user = userRepository.findById(requestDto.getMemberId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        Menu menu = menuRepository.findById(requestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        Cart cart = new Cart(menu, user, requestDto.getQuantity());
         Cart savedCart = cartRepository.save(cart);
         Cart readCart = cartRepository.findByIdWithMenuAndMember(savedCart.getId());
         return CartResponseDto.builder()
                 .cartId(readCart.getId())
-                .menuId(readCart.getPMenu().getId())
-                .menuName(readCart.getPMenu().getName())
-                .memberId(readCart.getMember().getId())
-                .memberName(readCart.getMember().getName())
+                .menuId(readCart.getMenu().getId())
+                .menuName(readCart.getMenu().getMenuName())
+                .memberId(readCart.getUser().getId())
+                .memberName(readCart.getUser().getUserName())
                 .quantity(readCart.getQuantity())
                 .build();
     }
@@ -52,16 +52,16 @@ public class CartService {
 
     @Transactional
     public CartResponseDto update(CartUpdateRequestDto updateRequestDto, Long cartId) {
-        PMenu menu = pMenuRepository.findById(updateRequestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        Menu menu = menuRepository.findById(updateRequestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
         Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
         cart.update(menu, updateRequestDto.getQuantity());
         Cart readCart = cartRepository.findByIdWithMenuAndMember(cart.getId());
         return CartResponseDto.builder()
                 .cartId(readCart.getId())
-                .menuId(readCart.getPMenu().getId())
-                .menuName(readCart.getPMenu().getName())
-                .memberId(readCart.getMember().getId())
-                .memberName(readCart.getMember().getName())
+                .menuId(readCart.getMenu().getId())
+                .menuName(readCart.getMenu().getMenuName())
+                .memberId(readCart.getUser().getId())
+                .memberName(readCart.getUser().getUserName())
                 .quantity(readCart.getQuantity())
                 .build();
     }

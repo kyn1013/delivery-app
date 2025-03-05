@@ -14,19 +14,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o " +
             "LEFT JOIN FETCH o.store s " +
-            "LEFT JOIN FETCH o.member m " +
-            "WHERE o.member.id = :userId")
+            "LEFT JOIN FETCH o.user u " +
+            "WHERE o.user.id = :userId")
     Order findByUserId(@Param("userId") Long userId);
 
     @Query("SELECT o FROM Order o " +
             "LEFT JOIN FETCH o.store s " +
-            "LEFT JOIN FETCH o.member m " +
-            "WHERE o.member.id = :userId")
+            "LEFT JOIN FETCH o.user u " +
+            "WHERE o.user.id = :userId")
     Page<Order> findByUserIdPaged(Pageable pageable, @Param("userId") Long userId);
 
     @Query("SELECT o FROM Order o " +
             "LEFT JOIN FETCH o.store s " +
-            "LEFT JOIN FETCH o.member m " +
+            "LEFT JOIN FETCH o.user m " +
             "WHERE o.id = :orderId")
     Order findByOrderId(@Param("orderId") Long orderId);
 
