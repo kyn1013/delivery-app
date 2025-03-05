@@ -2,6 +2,8 @@ package com.example.deliveryapp.review.service;
 
 import com.example.deliveryapp.common.exception.errorcode.CustomException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
+import com.example.deliveryapp.order.entity.Order;
+import com.example.deliveryapp.order.repository.OrderRepository;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
 import com.example.deliveryapp.review.dto.request.ReviewSaveRequestDto;
@@ -30,7 +32,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-//  private final OrderRepository orderRepository; //주문 정보 가져오기 위함
+    private final OrderRepository orderRepository; //주문 정보 가져오기 위함
     private final StoreRepository storeRepository; //가게 정보 가져오기 위함
 
     @Transactional
@@ -40,21 +42,21 @@ public class ReviewService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        /* Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));*/
+        Long orderId = dto.getOrderId();
+        Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
 
         Long storeId = dto.getStoreId();
-
         Store store = storeRepository.findById(storeId)
                     .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
 
             // 주문 상태 체크: 완료된 주문만 리뷰 작성 가능
-           /* if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
+           if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new IllegalStateException("배달 완료된 주문만 리뷰를 작성할 수 있습니다.");
-            } */ // order 구현 뒤 주석 제거
+            }
         Review review = new Review(user,
                 store,
-//                order,
+                order,
                 dto.getScore(),
                 dto.getContent()
                 );
@@ -64,7 +66,7 @@ public class ReviewService {
                 savedReview.getId(),
                 user.getId(),
                 store.getId(),
-//                order.getId(),
+                order.getId(),
                 savedReview.getContent(),
                 savedReview.getScore(),
                 savedReview.getCreatedAt()
@@ -84,7 +86,7 @@ public class ReviewService {
             ReviewResponseDto dto = new ReviewResponseDto(review.getId(),
                    review.getUser().getId(),
                    review.getStore().getId(),
-//                 review.getOrder().getId(),
+                   review.getOrder().getId(),
                     review.getScore(),
                     review.getContent(),
                     review.getCreatedAt(),
@@ -97,7 +99,7 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewUpdateResponseDto update(/* Long storeId, Long orderId, */ ReviewUpdateRequestDto dto, Long id, Long userId) {
+    public ReviewUpdateResponseDto update(Long storeId, Long orderId, ReviewUpdateRequestDto dto, Long id, Long userId) {
         // 리뷰 존재 여부 확인
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
@@ -110,7 +112,7 @@ public class ReviewService {
         review.update(dto.getContent(), dto.getScore());
         return  new ReviewUpdateResponseDto(review.getId(),
                 review.getStore().getId(),
-//                review.getOrder().getId(),
+                review.getOrder().getId(),
                 review.getScore(),
                 review.getContent(),
                 review.getUpdatedAt()

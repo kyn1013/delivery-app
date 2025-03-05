@@ -33,8 +33,8 @@ public class ReviewController {
 
     // 리뷰 조회
     @GetMapping("/api/v1/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> findAll(/* Long userId, Long storeId, Long orderId */) {
-        return ResponseEntity.ok(reviewService.findAll(/* userId, storeId, orderId */));
+    public ResponseEntity<List<ReviewResponseDto>> findAll(Long userId, Long storeId, Long orderId) {
+        return ResponseEntity.ok(reviewService.findAll(userId, storeId, orderId ));
     }
 
     // 리뷰 수정
@@ -42,9 +42,11 @@ public class ReviewController {
     public ResponseEntity<ReviewUpdateResponseDto> update (
             @Auth AuthUser user, // JWT 토큰 검증
             @RequestBody ReviewUpdateRequestDto dto,
-            @PathVariable /* Long storeId, Long orderId, */ Long id
+            @PathVariable Long id,
+            @PathVariable Long storeId,
+            @PathVariable Long orderId
     ) {
-        return ResponseEntity.ok(reviewService.update(dto, id, user.getId() /*,  store.getId(), order.getId */));
+        return ResponseEntity.ok(reviewService.update(dto, id, user.getId(), store.getId(), order.getId));
     }
 
     // 리뷰 삭제
