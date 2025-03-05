@@ -13,6 +13,8 @@ import java.util.List;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
+    List<Menu> findByStoreId(Long storeId);
+
     // 특정 store의 메뉴 전체 조회, 카테고리 순서로 정렬,
     @Query("SELECT m FROM Menu m WHERE m.store.id = :storeId ORDER BY m.menuCategory, m.menuName ASC")
     List<Menu> findByStoreIdOrderByCategory(Long storeId);
@@ -32,5 +34,5 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
             "WHERE m.id = :menuId")
     Menu findByIdWithStore(@Param("menuId") Long menuId);
 
-
+    boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
 }

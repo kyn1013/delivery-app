@@ -64,8 +64,12 @@ public class Menu extends BaseEntity {
     }
 
     public void simpleUpdate(MenuStatus menuStatus, Integer stockQuantity) {
-        this.menuStatus = menuStatus;
-        this.stockQuantity = stockQuantity;
+        if (menuStatus != null && !menuStatus.equals(this.menuStatus)) {
+            this.menuStatus = menuStatus;
+        }
+        if (stockQuantity != null && !stockQuantity.equals(this.stockQuantity)) {
+            this.stockQuantity = stockQuantity;
+        }
     }
 
     public void update(String menuName, BigDecimal price, MenuCategory menuCategory,
