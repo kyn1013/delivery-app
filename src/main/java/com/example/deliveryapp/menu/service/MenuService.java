@@ -6,8 +6,12 @@ import com.example.deliveryapp.menu.dto.response.MenuResponseDto;
 import com.example.deliveryapp.menu.dto.response.MenuSimpleResponseDto;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
+import com.example.deliveryapp.menu.exception.DuplicateMenuException;
 import com.example.deliveryapp.menu.repository.MenuRepository;
+import com.example.deliveryapp.store.entity.Store;
+import com.example.deliveryapp.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +23,16 @@ import java.util.stream.Collectors;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final StoreRepository storeRepository;
 
     @Transactional
     public MenuSimpleResponseDto saveMenu(MenuRequestDto dto, Long storeId) {
-
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found")
+                );
         // 해당 스토어에 중복된 메뉴 이름 검증.
-        if (menuRepository.existsByStoreIdAndMenuName(storeId,dto.getMenuName())) {
-            throw new IllegalArgumentException("Menu already exists");
+        if (menuRepository.existsByStoreIdAndMenuNameAndMenuStatusNot(storeId,dto.getMenuName(),MenuStatus.DELETED)) {
+            throw new DuplicateMenuException(HttpStatus.BAD_REQUEST,"DUPLICATED_MENU","이미 존재하는 메뉴 이름입니다.");
         }
 
         Menu menu = new Menu(
@@ -92,6 +99,9 @@ public class MenuService {
     public void delete(Long menuId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new IllegalArgumentException("Menu not found"));
+        if (menu.getMenuStatus() == MenuStatus.DELETED) {
+            throw new IllegalArgumentException("이미 삭제된 메뉴입니다.");
+        }
 
         menu.delete(); // 'DELETED'로 변경
         menuRepository.save(menu); // 변경 내용 저장
@@ -103,7 +113,7 @@ public class MenuService {
         List<Menu> menus = menuRepository.findAllByStoreIdAndMenuStatusNot(
                 storeId, MenuStatus.DELETED);
 
-        if (menus.isEmpty()) {
+        if (menus==null||menus.isEmpty()) {
             throw new IllegalArgumentException("Menu not found");
         }
 
