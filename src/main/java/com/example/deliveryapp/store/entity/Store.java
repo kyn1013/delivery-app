@@ -1,26 +1,39 @@
 package com.example.deliveryapp.store.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.deliveryapp.user.entity.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+import java.time.LocalDateTime;
+
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
 @NoArgsConstructor
-public class Store extends BaseEntity {
+public class Store extends BaseEntity {  // BaseEntity 상속
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Store(Long id) {
-        this.id = id;
-    }
+    private String businessName;
 
-    /* public static Store fromStoreId(Long id) {
-        return new Store(id);
-    } */
+    private String category;
+
+    private LocalDateTime openingTime;
+
+    private LocalDateTime closingTime;
+
+
+    private Double minOrderPrice;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;  // 가게의 주인(사장님)
+
 }
