@@ -9,6 +9,10 @@ import lombok.Setter;
 @Setter
 public class ReviewSaveRequestDto {
 
+    private Long storeId;
+    private Long orderId;
+    private Long userId;
+
     @NotBlank(message = "내용을 입력하세요.")
     private String content;
 

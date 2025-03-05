@@ -65,9 +65,6 @@ public class User extends BaseEntity {
     public void updateDelete(IsDeleted isDeleted) {
         this.isDeleted = isDeleted;
     }
-    /*public static User fromUserId(Long id) {
-        return new User(id);
-    } */
 
     public void changePassword(String newPassword) {
         this.password = newPassword;

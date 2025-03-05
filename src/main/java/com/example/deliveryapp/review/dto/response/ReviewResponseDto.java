@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public class ReviewResponseDto {
 
     private final Long id;
-    /*private final Long userId;
-    private final Long storeId;
+    private final Long userId;
+    /*private final Long storeId;
     private final Long orderId;*/
     private final int score;
     private final String content;
@@ -17,8 +17,8 @@ public class ReviewResponseDto {
     private final LocalDateTime updatedAt;
 
     public ReviewResponseDto(Long id,
-                             /*Long userId,
-                             Long storeId,
+                             Long userId,
+                            /* Long storeId,
                              Long orderId,*/
                              int score,
                              String content,
@@ -26,8 +26,8 @@ public class ReviewResponseDto {
                              LocalDateTime updatedAt
     ) {
         this.id = id;
-        /*this.userId = userId;
-        this.storeId = storeId;
+        this.userId = userId;
+        /*this.storeId = storeId;
         this.orderId = orderId;*/
         this.score = score;
         this.content = content;

@@ -1,5 +1,7 @@
 package com.example.deliveryapp.review.service;
 
+import com.example.deliveryapp.common.exception.errorcode.CustomException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
 import com.example.deliveryapp.review.dto.request.ReviewSaveRequestDto;
@@ -7,6 +9,9 @@ import com.example.deliveryapp.review.dto.response.ReviewSaveResponseDto;
 import com.example.deliveryapp.review.dto.response.ReviewUpdateResponseDto;
 import com.example.deliveryapp.review.entity.Review;
 import com.example.deliveryapp.review.repository.ReviewRepository;
+import com.example.deliveryapp.store.repository.StoreRepository;
+import com.example.deliveryapp.user.entity.User;
+import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,33 +25,39 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-//    private final OrderRepository orderRepository; //주문 정보 가져오기 위함
+    private final UserRepository userRepository;
+//  private final OrderRepository orderRepository; //주문 정보 가져오기 위함
+//  private final StoreRepository storeRepository; //가게 정보 가져오기 위함
 
     @Transactional
-    public ReviewSaveResponseDto save(/* Long userId, Long storeId, Long orderId, */ ReviewSaveRequestDto dto) {
-        /* User user = User.fromUserId(userId);
-        Store store = Store.fromStoreId(storeId);
-        Order order = Order.fromOrderId(orderId); */
+    public ReviewSaveResponseDto save(ReviewSaveRequestDto dto) {
+        Long userId = dto.getUserId();
 
-        /* public ReviewSaveResponseDto save(Long orderId, ReviewSaveRequestDto dto) {
-            // 주문 정보 가져오기
-            Order order = orderRepository.findById(orderId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        /* Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+
+       /* Store store = storeRepository.findById(storeId)
                     .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
 
             // 주문 상태 체크: 완료된 주문만 리뷰 작성 가능
             if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
                 throw new IllegalStateException("배달 완료된 주문만 리뷰를 작성할 수 있습니다.");
             } */ // order 구현 뒤 주석 제거
-        Review review = new Review(/* user,
-                store,
+        Review review = new Review(user,
+                /*store,
                 order, */
                 dto.getScore(),
                 dto.getContent()
                 );
         Review savedReview = reviewRepository.save(review);
-        return new ReviewSaveResponseDto(savedReview.getId(),
-                /* user.getId(),
-                store.getId(),
+
+        return new ReviewSaveResponseDto(
+                savedReview.getId(),
+                user.getId(),
+                /* store.getId(),
                 order.getId(), */
                 savedReview.getContent(),
                 savedReview.getScore(),
@@ -56,11 +67,7 @@ public class ReviewService {
 
     // 리뷰 조회
     @Transactional(readOnly = false)
-    public List<ReviewResponseDto> findAll(/* Long userId, Long storeId, Long orderId */) {
-        /* User user = User.fromUserId(userId);
-        Store store = Store.fromStoreId(storeId);
-        Order order = Order.fromOrderId(orderId); */
-
+    public List<ReviewResponseDto> findAll() {
         // 리뷰 최신순으로 정렬
 
         List<Review> reviews = reviewRepository.findAll(Sort.by(Sort.Order.desc("createdAt")));
@@ -69,8 +76,8 @@ public class ReviewService {
 
         for (Review review : reviews) {
             ReviewResponseDto dto = new ReviewResponseDto(review.getId(),
-                   /* user.getId(),
-                    store.getId(),
+                   review.getUser().getId(),
+                    /* store.getId(),
                     order.getId(), */
                     review.getScore(),
                     review.getContent(),
@@ -84,17 +91,15 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewUpdateResponseDto update(/* Long storeId, Long orderId, */ ReviewUpdateRequestDto dto, Long id) {
-       /* Store store = Store.fromStoreId(storeId);
-        Order order = Order.fromOrderId(orderId); */
-
+    public ReviewUpdateResponseDto update(/* Long storeId, Long orderId, */ ReviewUpdateRequestDto dto, Long id, Long userId) {
+        // 리뷰 존재 여부 확인
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("일차하는 정보가 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         //작성자 검증
-        /* if (!review.getUser().getId().equals(userid)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_POST_UPDATE);
-        } */ // 회원가입 구현후에 주석 제거
+        if (!review.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_UPDATE);
+        }
 
         review.update(dto.getContent(), dto.getScore());
         return  new ReviewUpdateResponseDto(review.getId(),
@@ -109,16 +114,17 @@ public class ReviewService {
 
     // 리뷰 삭제
     @Transactional
-    public void deleteById(Long id) {
-            if (!reviewRepository.existsById(id)) {
-                throw new IllegalArgumentException("삭제할 리뷰가 없습니다.");
-            }
+    public void deleteById(Long id, Long userId) {
+        // 리뷰 존재 여부 확인
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         //작성자 검증
-        /* if (!review.getUser().getId().equals(userid)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_POST_DELETE);
-        } */ // 회원가입 구현후에 주석 제거
-            reviewRepository.deleteById(id);
+        if (!review.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_DELETE);
+        }
+        // 리뷰 삭제
+        reviewRepository.deleteById(id);
         }
     }
 
