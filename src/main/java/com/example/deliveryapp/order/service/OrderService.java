@@ -1,5 +1,6 @@
 package com.example.deliveryapp.order.service;
 
+import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.cart.entity.Cart;
 import com.example.deliveryapp.cart.repository.CartRepository;
 import com.example.deliveryapp.order.dto.response.OrderDetailResponseDto;
@@ -38,10 +39,10 @@ public class OrderService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OrderResponseDto save(Long userId) {
+    public OrderResponseDto save(AuthUser authUser) {
         // 사용자 아이디로 장바구니에 있는 목록을 조회해서 첫번째 메뉴를 통해서 가게 아이디를 뽑아옴
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
-        List<Cart> carts = cartRepository.findByUserId(userId);
+        User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        List<Cart> carts = cartRepository.findByUserId(authUser.getId());
         Long storeId = carts.get(0).getMenu().getStore().getId();
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new RuntimeException("데이터가 없습니다."));
         // 뽑아온 가게 아이디를 이용해서 주문 객체 생성
@@ -60,10 +61,10 @@ public class OrderService {
         }
 
         // 장바구니 비우기
-        cartRepository.deleteByUserId(userId);
+        cartRepository.deleteByUserId(authUser.getId());
 
         // 주문 정보 조회하기
-        Order readOrder = orderRepository.findByUserId(userId);
+        Order readOrder = orderRepository.findByUserId(authUser.getId());
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(readOrder.getId());
 
         // 총 주문 금액 구하기
@@ -89,7 +90,7 @@ public class OrderService {
         return orderResponseDto;
     }
 
-    public OrderResponseDto getOrder(Long orderId) {
+    public OrderResponseDto getOrder(AuthUser authUser, Long orderId) {
         Order readOrder = orderRepository.findByOrderId(orderId);
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(readOrder.getId());
         List<OrderDetailResponseDto> orderDetailResponseDtos = OrderDetailResponseDto.toResponse(orderDetails);
@@ -117,15 +118,15 @@ public class OrderService {
         return formattedDay +'-'+ uniqueString;
     }
 
-    public Page<OrderInfoResponseDto> getOrders(int page, int size, Long userId) {
+    public Page<OrderInfoResponseDto> getOrders(int page, int size, AuthUser authUser) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Order> orderPage = orderRepository.findByUserIdPaged(pageable, userId);
+        Page<Order> orderPage = orderRepository.findByUserIdPaged(pageable, authUser.getId());
         Page<OrderInfoResponseDto> orderResponseDtoPage = OrderInfoResponseDto.toResponsePage(orderPage, pageable);
         return orderResponseDtoPage;
     }
 
     @Transactional
-    public OrderInfoResponseDto cancelOrder(Long orderId) {
+    public OrderInfoResponseDto cancelOrder(AuthUser authUser, Long orderId) {
         Order order = orderRepository.findByOrderId(orderId);
         order.update(OrderStatus.of(3));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
@@ -140,7 +141,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderInfoResponseDto acceptOrder(Long orderId) {
+    public OrderInfoResponseDto acceptOrder(AuthUser authUser, Long orderId) {
         Order order = orderRepository.findByOrderId(orderId);
         order.update(OrderStatus.of(1));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
@@ -155,7 +156,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderInfoResponseDto rejectOrder(Long orderId) {
+    public OrderInfoResponseDto rejectOrder(AuthUser authUser, Long orderId) {
         Order order = orderRepository.findByOrderId(orderId);
         order.update(OrderStatus.of(2));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
@@ -170,7 +171,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderInfoResponseDto deliveringOrder(Long orderId) {
+    public OrderInfoResponseDto deliveringOrder(AuthUser authUser, Long orderId) {
         Order order = orderRepository.findByOrderId(orderId);
         order.update(OrderStatus.of(4));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
@@ -185,7 +186,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderInfoResponseDto completeOrder(Long orderId) {
+    public OrderInfoResponseDto completeOrder(AuthUser authUser, Long orderId) {
         Order order = orderRepository.findByOrderId(orderId);
         order.update(OrderStatus.of(5));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()

@@ -29,6 +29,13 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
             "LEFT JOIN FETCH c.user u " +
             "LEFT JOIN FETCH c.menu.store s " +
             "WHERE c.user.id = :userId")
+    List<Cart> findByMemberIdWithStore(@Param("userId") Long userId);
+
+    @Query("SELECT c FROM Cart c " +
+            "LEFT JOIN FETCH c.menu m " +
+            "LEFT JOIN FETCH c.user u " +
+            "LEFT JOIN FETCH c.menu.store s " +
+            "WHERE c.user.id = :userId")
     List<Cart> findByUserId(@Param("userId") Long userId);
 
     void deleteByUserId(Long memberId);
