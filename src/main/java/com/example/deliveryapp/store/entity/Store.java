@@ -1,7 +1,6 @@
 package com.example.deliveryapp.store.entity;
 
 import com.example.deliveryapp.common.entity.BaseEntity;
-import com.example.deliveryapp.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

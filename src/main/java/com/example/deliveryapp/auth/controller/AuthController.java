@@ -10,7 +10,9 @@ import com.example.deliveryapp.auth.dto.response.SignupResponseDto;
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.auth.service.AuthService;
 import com.example.deliveryapp.common.annotation.Auth;
+
 import jakarta.servlet.http.HttpServletResponse;
+import com.example.deliveryapp.common.annotation.OwnerUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
