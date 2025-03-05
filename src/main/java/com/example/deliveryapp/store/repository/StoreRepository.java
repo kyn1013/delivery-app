@@ -15,5 +15,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     // 특정 사용자가 소유한 가게 목록을 조회
     List<Store> findByOwnerId(Long ownerId);
+
 }
 
