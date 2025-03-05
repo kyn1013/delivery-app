@@ -9,6 +9,7 @@ import com.example.deliveryapp.cart.repository.CartRepository;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.repository.MenuRepository;
 import com.example.deliveryapp.user.entity.User;
+import com.example.deliveryapp.user.enums.UserRole;
 import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,11 +32,16 @@ public class CartService {
 
     @Transactional
     public CartResponseDto save(AuthUser authUser, CartSaveRequestDto requestDto) {
+        // 일반 회원이 요청했는지 검증
+        isValidCustomer(authUser);
         User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
         Menu menu = menuRepository.findById(requestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
 
-        // 장바구니에 담은 메뉴가 이미 담은 메뉴와 동일한지 검증
+        // 장바구니에 담은 메뉴가 이미 담은 메뉴의 가게와 동일한지 검증
         isSameStoreMenu(requestDto, user);
+
+        // 가게의 재고보다 더 많이 장바구니에 넣었는지 검증
+        isStockEnoughForOrder(requestDto.getQuantity(), menu);
 
         Cart cart = new Cart(menu, user, requestDto.getQuantity());
         Cart savedCart = cartRepository.save(cart);
@@ -51,6 +57,8 @@ public class CartService {
     }
 
     public Page<CartResponseDto> getCarts(int page, int size, AuthUser authUser) {
+        // 일반 회원이 요청했는지 검증
+        isValidCustomer(authUser);
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Cart> cartPage = cartRepository.findByMemberId(pageable, authUser.getId());
         Page<CartResponseDto> responsePage = toResponsePage(cartPage, pageable);
@@ -59,8 +67,14 @@ public class CartService {
 
     @Transactional
     public CartResponseDto update(AuthUser authUser, CartUpdateRequestDto updateRequestDto, Long cartId) {
+        // 일반 회원이 요청했는지 검증
+        isValidCustomer(authUser);
         Menu menu = menuRepository.findById(updateRequestDto.getMenuId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        Cart cart = cartRepository.findByIdWithMember(cartId).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        // 자기 자신의 장바구니를 수정하는지 검증
+        isCartOwnedByUser(authUser, cart);
+        // 가게의 재고보다 더 많이 장바구니에 넣었는지 검증
+        isStockEnoughForOrder(updateRequestDto.getQuantity(), menu);
         cart.update(menu, updateRequestDto.getQuantity());
         Cart readCart = cartRepository.findByIdWithMenuAndMember(cart.getId());
         return CartResponseDto.builder()
@@ -74,12 +88,16 @@ public class CartService {
     }
 
     public void delete(AuthUser authUser, Long cartId) {
+        // 일반 회원이 요청했는지 검증
+        isValidCustomer(authUser);
         Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        // 자기 자신의 장바구니를 삭제하는지 검증
+        isCartOwnedByUser(authUser, cart);
         cartRepository.delete(cart);
     }
 
     /*
-     * 장바구니에 담은 메뉴가 이미 담은 메뉴와 동일한 가게인지 검증하는 메서드
+     * 장바구니에 담은 메뉴가 이미 담은 메뉴의 가게와 동일한지 검증하는 메서드
      */
     private void isSameStoreMenu(CartSaveRequestDto requestDto, User user) {
         List<Cart> savedCarts = cartRepository.findByMemberIdWithStore(user.getId());
@@ -89,6 +107,33 @@ public class CartService {
             if (!storeId.equals(savedMenu.getStore().getId())){
                 throw new RuntimeException("동일한 가게의 메뉴만 담을 수 있습니다");
             }
+        }
+    }
+
+    /*
+     * 가게의 재고보다 더 많이 장바구니에 넣었는지 검증
+     */
+    private static void isStockEnoughForOrder(Long orderQuantity, Menu menu) {
+        if (menu.getStockQuantity() < orderQuantity){
+            throw new RuntimeException("가게의 재고보다 더 많이 주문 할 수 없습니다.");
+        }
+    }
+
+    /*
+     * 일반 회원인지 검증하는 메서드
+     */
+    private static void isValidCustomer(AuthUser authUser) {
+        if (!UserRole.ROLE_CUSTOMER.equals(authUser.getUserRole())){
+            throw new RuntimeException("일반 회원만 가능한 기능입니다");
+        }
+    }
+
+    /*
+     * 자기 자신의 장바구니를 수정하는지 검증하는 메서드
+     */
+    private static void isCartOwnedByUser(AuthUser authUser, Cart cart) {
+        if (!authUser.getId().equals(cart.getUser().getId())){
+            throw new RuntimeException("자신의 장바구니만 수정할 수 있습니다");
         }
     }
 }

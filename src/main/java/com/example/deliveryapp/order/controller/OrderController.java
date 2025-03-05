@@ -2,6 +2,7 @@ package com.example.deliveryapp.order.controller;
 
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.annotation.Auth;
+import com.example.deliveryapp.common.annotation.OwnerUser;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
 import com.example.deliveryapp.order.service.OrderService;
@@ -61,6 +62,7 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 사장님 : 주문 수락
      */
+    @OwnerUser
     @PatchMapping("/accept/{orderId}")
     public ResponseEntity<OrderInfoResponseDto> acceptOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.acceptOrder(authUser, orderId);

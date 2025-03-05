@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
@@ -23,6 +24,11 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
             "LEFT JOIN FETCH c.user u " +
             "WHERE c.user.id = :userId")
     Page<Cart> findByMemberId(Pageable pageable, @Param("userId") Long userId);
+
+    @Query("SELECT c FROM Cart c " +
+            "LEFT JOIN FETCH c.user u " +
+            "WHERE c.id = :cartId")
+    Optional<Cart> findByIdWithMember(@Param("cartId") Long cartId);
 
     @Query("SELECT c FROM Cart c " +
             "LEFT JOIN FETCH c.menu m " +
