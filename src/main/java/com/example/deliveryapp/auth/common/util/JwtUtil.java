@@ -21,7 +21,8 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+    private static final long ACCESS_TOKEN_TIME = 3 * 1000L; // 30분
+    private static final long REFRESH_TOKEN_TIME = 30L * 24 * 60 * 60 * 1000; // 1달
 
     @Value("${jwt.secret.key}")
     private String secretKey; //application.properties에 있는 jwt.secret.key 가져옴
@@ -44,7 +45,38 @@ public class JwtUtil {
                         .setSubject(String.valueOf(userId)) //JWT의 sub(주제) 필드에 userId를 문자열로 저장
                         .claim("email", email)
                         .claim("userRole", userRole) //JWT의 payload에 이메일과 역할(Role)을 추가
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME)) //토큰의 만료 시간을 현재 시간 + 60분으로 설정
+                        .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME)) //토큰의 만료 시간을 현재 시간 + 60분으로 설정
+                        .setIssuedAt(date) //토큰 발급일을 현재시간으로 설정
+                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘으로 서명
+                        .compact();
+    }
+
+    //access token(30분)과 refresh token(1달)은 만료기간에 있어서 차이가 있음.
+    //JWT 생성 (access token)
+    public String createAccessToken(Long userId, String email, UserRole userRole) {
+        Date date = new Date();
+
+        return BEARER_PREFIX +
+                Jwts.builder()
+                        .setSubject(String.valueOf(userId)) //JWT의 sub(주제) 필드에 userId를 문자열로 저장
+                        .claim("email", email)
+                        .claim("userRole", userRole) //JWT의 payload에 이메일과 역할(Role)을 추가
+                        .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME)) //토큰의 만료 시간을 현재 시간 + 30분으로 설정
+                        .setIssuedAt(date) //토큰 발급일을 현재시간으로 설정
+                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘으로 서명
+                        .compact();
+    }
+
+    //JWT 생성 (refresh token)
+    public String createRefreshToken(Long userId, String email, UserRole userRole) {
+        Date date = new Date();
+
+        return BEARER_PREFIX +
+                Jwts.builder()
+                        .setSubject(String.valueOf(userId)) //JWT의 sub(주제) 필드에 userId를 문자열로 저장
+                        .claim("email", email)
+                        .claim("userRole", userRole) //JWT의 payload에 이메일과 역할(Role)을 추가
+                        .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME)) //토큰의 만료 시간을 현재 시간 + 1달으로 설정
                         .setIssuedAt(date) //토큰 발급일을 현재시간으로 설정
                         .signWith(key, signatureAlgorithm) // 암호화 알고리즘으로 서명
                         .compact();

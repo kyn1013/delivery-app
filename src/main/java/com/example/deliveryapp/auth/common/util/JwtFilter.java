@@ -1,6 +1,9 @@
 package com.example.deliveryapp.auth.common.util;
 
+import com.example.deliveryapp.auth.repository.BlackListRepository;
+import com.example.deliveryapp.auth.repository.RefreshTokenRepository;
 import com.example.deliveryapp.user.enums.UserRole;
+import com.example.deliveryapp.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -78,7 +81,8 @@ public class JwtFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
-            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+            //httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+            httpResponse.sendRedirect("/api/v1/auth/users/reissue-token"); // 만료된 경우 토큰 재발급 api로 리다이렉트
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
