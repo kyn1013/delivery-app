@@ -69,6 +69,8 @@ public class User extends BaseEntity {
     public void changeUsername(String userName) {
         this.userName = userName;
     }
+
+
 }
 
 
