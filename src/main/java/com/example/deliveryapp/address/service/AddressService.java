@@ -2,7 +2,8 @@ package com.example.deliveryapp.address.service;
 
 import com.example.deliveryapp.address.entity.Address;
 import com.example.deliveryapp.address.repository.AddressRepository;
-import com.example.deliveryapp.auth.common.exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.user.dto.request.AddAddressRequestDto;
 import com.example.deliveryapp.user.dto.request.ChangeAddressRequestDto;
 import com.example.deliveryapp.user.dto.response.AddressResponseDto;
@@ -28,13 +29,13 @@ public class AddressService {
 
         //유효한 유저 검사
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //해당 유저 아이디로 저장된 주소 개수가 10개 초과인지 확인
         Long addressCount = addressRepository.countAddressesByUserId(id);
         if (addressCount > 9) {
-            throw new InvalidRequestException("주소는 기본배송지를 포함 최대 10개까지 생성할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.MAX_ADDRESS_COUNT);
         }
 
         //배송지 생성
@@ -55,29 +56,29 @@ public class AddressService {
     public void deleteAddress(Long userId, Long addressId) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //유효한 주소 검사
         Address foundAddress = addressRepository.findById(addressId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 주소입니다.")
+                () -> new InvalidRequestException(ErrorCode.ADDRESS_NOT_FOUND)
         );
 
         //이 주소가 이 유저의 주소가 맞는지
         if (foundAddress.getUser().getId() != foundUser.getId()) {
-            throw new InvalidRequestException("사용자의 올바른 주소가 아닙니다.");
+            throw new InvalidRequestException(ErrorCode.USER_ADDRESS_MISMATCH);
         }
 
         //해당 주소가 기본배송지인지 검사 -> 기본배송지라면 삭제 불가능
         if(foundAddress.getIsDefault() == true) {
-            throw new InvalidRequestException("기본 배송지는 삭제 불가능합니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN_DEFAULT_ADDRESS_DELETION);
         }
 
         //해당 유저 아이디로 조회 시 총 주소개수가 1개라면 삭제 불가능
         Long addressCount = addressRepository.countAddressesByUserId(foundUser.getId());
 
         if (addressCount <= 1) {
-            throw new InvalidRequestException("배송지는 최소 1개 이상이어야 합니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN_LAST_ADDRESS_DELETION);
         }
 
         //삭제
@@ -89,17 +90,17 @@ public class AddressService {
     public ChangeAddressResponseDto changeAddress (Long userId, Long addressId, ChangeAddressRequestDto dto) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //유효한 주소 검사
         Address foundAddress = addressRepository.findById(addressId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 주소입니다.")
+                () -> new InvalidRequestException(ErrorCode.ADDRESS_NOT_FOUND)
         );
 
         //이 주소가 이 유저의 주소가 맞는지
         if (foundAddress.getUser().getId() != foundUser.getId()) {
-            throw new InvalidRequestException("사용자의 올바른 주소가 아닙니다.");
+            throw new InvalidRequestException(ErrorCode.USER_ADDRESS_MISMATCH);
         }
 
         //수정
@@ -117,17 +118,17 @@ public class AddressService {
     public ChangeAddressResponseDto changeDefaultAddress(Long userId, Long addressId) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //유효한 주소 검사
         Address foundAddress = addressRepository.findById(addressId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 주소입니다.")
+                () -> new InvalidRequestException(ErrorCode.ADDRESS_NOT_FOUND)
         );
 
         //이 주소가 이 유저의 주소가 맞는지
         if (foundAddress.getUser().getId() != foundUser.getId()) {
-            throw new InvalidRequestException("사용자의 올바른 주소가 아닙니다.");
+            throw new InvalidRequestException(ErrorCode.USER_ADDRESS_MISMATCH);
         }
 
         //해당 사용자의 모든 주소들을 false로
@@ -148,7 +149,7 @@ public class AddressService {
     public List<AddressResponseDto> getAddresses (Long userId) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //해당 유저가 가지고있는 모든 주소들을 반환
@@ -160,17 +161,17 @@ public class AddressService {
     public AddressResponseDto getAddress (Long userId, Long addressId) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //유효한 주소 검사
         Address foundAddress = addressRepository.findById(addressId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 주소입니다.")
+                () -> new InvalidRequestException(ErrorCode.ADDRESS_NOT_FOUND)
         );
 
         //이 주소가 이 유저의 주소가 맞는지
         if (foundAddress.getUser().getId() != foundUser.getId()) {
-            throw new InvalidRequestException("사용자의 올바른 주소가 아닙니다.");
+            throw new InvalidRequestException(ErrorCode.USER_ADDRESS_MISMATCH);
         }
 
         return new AddressResponseDto(
