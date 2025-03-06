@@ -30,7 +30,7 @@ public class MenuController {
             @RequestBody @Valid MenuRequestDto dto,
             @PathVariable Long storeId) {
 
-        MenuSimpleResponseDto responseDto = menuService.saveMenu(dto, storeId);
+        MenuSimpleResponseDto responseDto = menuService.saveMenu(dto, storeId,user);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
