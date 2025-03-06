@@ -3,6 +3,7 @@ package com.example.deliveryapp.store.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class StoreCreateRequestDto {
 
     @NotBlank(message = "가게 이름은 필수 항목입니다.")
@@ -30,4 +32,6 @@ public class StoreCreateRequestDto {
 
     @NotBlank(message = "주소는 필수 항목입니다.")  // 주소 필드 추가
     private String address;
+
+
 }
