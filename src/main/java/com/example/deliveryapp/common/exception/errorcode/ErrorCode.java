@@ -34,10 +34,11 @@ public enum ErrorCode {
     INVALID_ORDER_AMOUNT(HttpStatus.BAD_REQUEST, "최소주문금액보다 적은 금액은 주문할 수 없습니다."),
     INVALID_OPERATING_HOURS(HttpStatus.BAD_REQUEST, "운영 시간이 아니므로 주문할 수 없습니다."),
     INVALID_ORDER_ACCESS(HttpStatus.FORBIDDEN, "자신의 가게의 주문만 상태를 변경할 수 있습니다."),
+    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "재고보다 더 많은 수를 주문할 수 없습니다."),
     UNAUTHORIZED_ORDER_ACCESS(HttpStatus.FORBIDDEN, "자신의 주문만 접근할 수 있습니다."),
     INVALID_CANCEL_STATE(HttpStatus.BAD_REQUEST, "주문 요청 상태에서만 취소가 가능합니다."),
     INVALID_ACCEPT_STATE(HttpStatus.BAD_REQUEST, "주문 요청 상태에서만 수락이 가능합니다."),
-    INVALID_REJECT_STATE(HttpStatus.BAD_REQUEST, "주문 요청 상태에서만 거절이 가능합니다."),
+    INVALID_REJECT_STATE(HttpStatus.BAD_REQUEST, "주문 요청 상태 혹은 수락 상태에서만 거절이 가능합니다."),
     INVALID_DELIVERY_START_STATE(HttpStatus.BAD_REQUEST, "주문 수락 상태에서만 배달시작이 가능합니다."),
     INVALID_DELIVERY_COMPLETE_STATE(HttpStatus.BAD_REQUEST, "배달 중 상태에서만 배달완료가 가능합니다."),
 
@@ -52,6 +53,7 @@ public enum ErrorCode {
     MAX_ADDRESS_COUNT(HttpStatus.BAD_REQUEST,"주소는 기본배송지를 포함 최대 10개까지 생성할 수 있습니다."),
     FORBIDDEN_DEFAULT_ADDRESS_DELETION(HttpStatus.BAD_REQUEST, "기본 배송지는 삭제 불가능합니다."),
     FORBIDDEN_LAST_ADDRESS_DELETION(HttpStatus.BAD_REQUEST,"배송지는 최소 1개 이상이어야 합니다.");
+
 
 
     private final HttpStatus status;

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -19,10 +20,10 @@ public class StoreCreateRequestDto {
     private String category;
 
     @NotNull(message = "오픈 시간은 필수 항목입니다.")
-    private LocalDateTime openingTime;
+    private LocalTime openingTime;
 
     @NotNull(message = "마감 시간은 필수 항목입니다.")
-    private LocalDateTime closingTime;
+    private LocalTime closingTime;
 
     @Positive(message = "최소 주문 금액은 0보다 커야 합니다.")
     private Double minOrderPrice;

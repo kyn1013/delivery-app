@@ -6,6 +6,7 @@ import com.example.deliveryapp.cart.repository.CartRepository;
 import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestException;
 import com.example.deliveryapp.common.exception.custom_exception.ServerException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
+import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.order.dto.response.OrderDetailResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -65,6 +67,10 @@ public class OrderService {
                 .build();
 
         Order savedOrder = orderRepository.save(order);
+
+        // 메뉴 재고 체크 한번 더해서 재고보다 적은데 주문하는 것은 아닌지 검증
+        validateStockAvailability(carts);
+
         // 가지고 온 목록을 이용해서 주문 상세 엔티티 생성하기
         for(Cart cart : carts){
             OrderDetail orderDetail = new OrderDetail(cart.getMenu(), savedOrder, cart.getQuantity(), cart.getMenu().getPrice());
@@ -72,7 +78,8 @@ public class OrderService {
         }
 
         // 주문 정보 조회하기
-        Order readOrder = orderRepository.findByUserId(authUser.getId());
+        List<Order> orders = orderRepository.findByUserId(authUser.getId());
+        Order readOrder = orders.get(orders.size() - 1); // 가장 최신 정보 가져오기
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(readOrder.getId());
 
         // 총 주문 금액 구하기
@@ -204,10 +211,23 @@ public class OrderService {
         // 사장 회원인지 검증
         isValidOwner(authUser);
         Order order = orderRepository.findByOrderId(orderId);
+
+        // 메뉴 재고 체크 한번 더해서 재고보다 적은데 주문하는 것은 아닌지 검증
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        for (OrderDetail orderDetail : orderDetails){
+            if (orderDetail.getQuantity() > orderDetail.getMenu().getStockQuantity()){
+                throw new ServerException(ErrorCode.INSUFFICIENT_STOCK);
+            } else {
+                Menu orderdMenu = orderDetail.getMenu();
+                orderdMenu.updateStockQuantity((int) (orderDetail.getMenu().getStockQuantity() - orderDetail.getQuantity()));
+            }
+        }
+
         // 자신의 가게의 주문정보인지 검증
         validateOwnerCanChangeOrderStatus(authUser, order);
         // 상태 변경이 가능한지 검증
         validateOrderDeliverable(order);
+
 
         order.update(OrderStatus.of(4));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
@@ -261,6 +281,18 @@ public class OrderService {
         }
     }
 
+
+    /*
+     * 메뉴 재고 체크를 한번 더 해서 재고보다 적은데 주문하는 것은 아닌지 검증하는 메서드
+     */
+    private static void validateStockAvailability(List<Cart> carts) {
+        for(Cart cart : carts){
+            if (cart.getQuantity() > cart.getMenu().getStockQuantity()) {
+                throw new ServerException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+        }
+    }
+
     /*
      * 최소 주문금액을 충족했는지 검증
      */
@@ -275,7 +307,7 @@ public class OrderService {
      * 가게 운영시간인지 검증
      */
     private static void isStoreOpenNow(Store store) {
-        if (!(LocalDateTime.now().isAfter(store.getOpeningTime()) && LocalDateTime.now().isBefore(store.getClosingTime()))) {
+        if (!(LocalTime.now().isAfter(store.getOpeningTime()) && LocalTime.now().isBefore(store.getClosingTime()))) {
             throw new ServerException(ErrorCode.INVALID_OPERATING_HOURS);
         }
     }
@@ -328,7 +360,7 @@ public class OrderService {
     }
 
     private static void validateOrderRejectable(Order order) {
-        if (!OrderStatus.ORDER_REQUESTED.equals(order.getState())){
+        if (!(OrderStatus.ORDER_REQUESTED.equals(order.getState()) || OrderStatus.ORDER_ACCEPTED.equals(order.getState()))) {
             throw new ServerException(ErrorCode.INVALID_REJECT_STATE);
         }
     }
