@@ -9,7 +9,7 @@ import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -45,5 +45,16 @@ public class StoreService {
 
         // 저장
         storeRepository.save(store);  // 저장
+    }
+
+    //가게명으로 검색
+    public List<Store> searchStores(String keyword) {
+        return storeRepository.findByBusinessNameContaining(keyword);
+    }
+
+    // 가게 단건 조회
+    public Store findStoreById(Long storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다."));
     }
 }
