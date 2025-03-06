@@ -22,8 +22,6 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시물이 존재하지 않습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문이 존재하지 않습니다."),
-    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게가 존재하지 않습니다.");
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 메뉴가 존재하지 않습니다."),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 장바구니가 존재하지 않습니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게가 존재하지 않습니다."),

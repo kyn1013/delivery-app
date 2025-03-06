@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
 public class ReviewSaveRequestDto {
     @NotNull(message = "상점id는 필수 값입니다.")
     private Long storeId;

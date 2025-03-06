@@ -2,7 +2,7 @@ package com.example.deliveryapp.review.controller;
 
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.annotation.Auth;
-import com.example.deliveryapp.common.exception.errorcode.CustomException;
+import com.example.deliveryapp.common.exception.custom_exception.CustomException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
@@ -40,25 +40,27 @@ public class ReviewController {
 
     // 리뷰 조회
     @GetMapping("/api/v1/stores/{storeId}/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> findAll(@PathVariable Long storeId) {
+    public ResponseEntity<List<ReviewResponseDto>> findAll(@Valid @PathVariable Long storeId) {
         return ResponseEntity.ok(reviewService.findAll(storeId));
     }
 
     // 리뷰 수정
-    @PatchMapping("/api/v1/stores/{storeId}/review/{id}")
+    @PatchMapping("/api/v1/orders/{orderId}/review/{id}")
     public ResponseEntity<ReviewUpdateResponseDto> update (
             @Auth AuthUser user, // JWT 토큰 검증
+            @PathVariable Long orderId,
             @PathVariable Long id,
-            @RequestBody ReviewUpdateRequestDto dto
+            @Valid @RequestBody ReviewUpdateRequestDto dto
     ) {
-        return ResponseEntity.ok(reviewService.update(user, id, dto));
+        return ResponseEntity.ok(reviewService.update(user, orderId, id, dto));
     }
 
     // 리뷰 삭제
 
-    @DeleteMapping("/api/v1/review/{id}")
+    @DeleteMapping("/api/v1/orders/{orderId}/reviews/{id}")
     public void delete(@Auth AuthUser user, // JWT 토큰 검증
-                       @PathVariable Long id) {
+                       @Valid @PathVariable Long orderId,
+                       @Valid @PathVariable Long id) {
         reviewService.deleteById(id, user.getId());
     }
 

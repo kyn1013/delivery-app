@@ -1,7 +1,7 @@
 package com.example.deliveryapp.review.service;
 
 import com.example.deliveryapp.auth.entity.AuthUser;
-import com.example.deliveryapp.common.exception.errorcode.CustomException;
+import com.example.deliveryapp.common.exception.custom_exception.CustomException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.order.entity.Order;
 import com.example.deliveryapp.order.repository.OrderRepository;
@@ -72,15 +72,17 @@ public class ReviewService {
                 savedReview.getScore(),
                 savedReview.getCreatedAt()
         );
+
     }
 
     // 리뷰 조회
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = true)
     public List<ReviewResponseDto> findAll(Long storeId) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
         // 리뷰 최신순으로 정렬
-
         List<Review> reviews = reviewRepository.findAll(Sort.by(Sort.Order.desc("createdAt")));
-
         List<ReviewResponseDto> dtos = new ArrayList<>();
 
         for (Review review : reviews) {
@@ -99,13 +101,20 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewUpdateResponseDto update(AuthUser user, Long reviewId, ReviewUpdateRequestDto dto) {
-        // 리뷰 존재 여부 확인
-        Review review = reviewRepository.findById(reviewId)
+    public ReviewUpdateResponseDto update(AuthUser user, Long orderId, Long id, ReviewUpdateRequestDto dto) {
+
+        User currentUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+
+         // 리뷰 존재 여부 확인
+        Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         //작성자 검증
-        if (!review.getUser().getId().equals(user)) {
+        if (!review.getUser().getId().equals(currentUser.getId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_UPDATE);
         }
 
