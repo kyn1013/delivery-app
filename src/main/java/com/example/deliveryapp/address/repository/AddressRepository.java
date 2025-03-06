@@ -15,7 +15,6 @@ import java.util.Optional;
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Transactional
-    @Modifying
     @Query("SELECT a FROM Address a WHERE a.user.id = :userId AND a.isDefault = true")
     Address findDefaultAddressByUserId(@Param("userId") Long userId);
 
