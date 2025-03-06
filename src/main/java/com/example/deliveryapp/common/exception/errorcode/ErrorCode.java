@@ -42,7 +42,10 @@ public enum ErrorCode {
     INVALID_DELIVERY_COMPLETE_STATE(HttpStatus.BAD_REQUEST, "배달 중 상태에서만 배달완료가 가능합니다."),
 
     // 인증/인가 관련 요청
-    //EMAIL_ALREADY_REGISTERED(HttpStatus.BAD_REQUEST,"이미 존재하는 이메일입니다."),
+    EMAIL_ALREADY_REGISTERED(HttpStatus.BAD_REQUEST,"이미 존재하는 이메일입니다."),
+    WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    LOGGED_OUT_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "로그아웃된 사용자의 Refresh Token입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST,"유효하지 않은 Refresh Token입니다."),
 
     // 주소 관련 요청
     USER_ADDRESS_MISMATCH(HttpStatus.BAD_REQUEST, "사용자의 올바른 주소가 아닙니다."),

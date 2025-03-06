@@ -3,7 +3,9 @@ package com.example.deliveryapp.user.service;
 import com.example.deliveryapp.address.entity.Address;
 import com.example.deliveryapp.address.repository.AddressRepository;
 import com.example.deliveryapp.auth.common.encoder.PasswordEncoder;
-import com.example.deliveryapp.auth.common.exception.InvalidRequestException;
+//import com.example.deliveryapp.auth.common.exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.user.dto.request.ChangePasswordRequestDto;
 import com.example.deliveryapp.user.dto.request.ChangeUserNameRequestDto;
 import com.example.deliveryapp.user.dto.response.MyPageResponseDto;
@@ -26,7 +28,7 @@ public class UserService {
     public MyPageResponseDto myInfo(Long id) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 유저입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         // 주소 테이블에서 해당 유저의 주소들을 검색 -> 그 주소들중 isDefault가 true인 주소 검색
@@ -47,12 +49,12 @@ public class UserService {
     public UserResponseDto changePassword(Long id, ChangePasswordRequestDto dto) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 유저입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //비밀번호 일치 검사
         if(!passwordEncoder.matches(dto.getOldPassword(), foundUser.getPassword())) {
-            throw new InvalidRequestException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidRequestException(ErrorCode.WRONG_PASSWORD);
         }
 
         //객체 업데이트
@@ -71,7 +73,7 @@ public class UserService {
     public UserResponseDto changeUsername(Long id, ChangeUserNameRequestDto dto) {
         //유효한 유저 검사
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 유저입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //객체 업데이트

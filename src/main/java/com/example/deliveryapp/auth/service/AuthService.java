@@ -2,7 +2,6 @@ package com.example.deliveryapp.auth.service;
 
 import com.example.deliveryapp.address.repository.AddressRepository;
 import com.example.deliveryapp.auth.common.encoder.PasswordEncoder;
-import com.example.deliveryapp.auth.common.exception.InvalidRequestException;
 import com.example.deliveryapp.auth.common.util.JwtUtil;
 import com.example.deliveryapp.auth.dto.request.LoginRequestDto;
 import com.example.deliveryapp.auth.dto.request.SignupRequestDto;
@@ -14,6 +13,8 @@ import com.example.deliveryapp.auth.entity.RefreshTokenBlackList;
 import com.example.deliveryapp.auth.repository.BlackListRepository;
 import com.example.deliveryapp.auth.repository.RefreshTokenRepository;
 import com.example.deliveryapp.address.entity.Address;
+import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.user.entity.User;
 import com.example.deliveryapp.user.enums.IsDeleted;
 import com.example.deliveryapp.user.enums.UserRole;
@@ -39,7 +40,7 @@ public class AuthService {
     public SignupResponseDto signup(SignupRequestDto dto) {
         //중복 이메일 검증
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new InvalidRequestStateException("이미 존재하는 이메일입니다.");
+            throw new InvalidRequestException(ErrorCode.EMAIL_ALREADY_REGISTERED);
         }
 
         //비밀번호 암호화
@@ -99,7 +100,7 @@ public class AuthService {
     public void withdraw(Long id) {
         //유저 검색
         User foundUser = userRepository.findById(id).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 유저입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         //idDeleted 업데이트
@@ -110,11 +111,12 @@ public class AuthService {
     public LoginResponseDto login(LoginRequestDto dto) {
         //유효 이메일 검증
         User foundUser = userRepository.findByEmail(dto.getEmail()).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 유저입니다."));
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
+        );
 
         //비밀번호 일치 검증
         if (!passwordEncoder.matches(dto.getPassword(), foundUser.getPassword())) {
-            throw new InvalidRequestException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidRequestException(ErrorCode.WRONG_PASSWORD);
         }
 
         //access token 발급 (30분)
@@ -134,7 +136,7 @@ public class AuthService {
     public void logout(Long id, String refreshToken) {
         //유저 검색
         if(!userRepository.existsById(id)) {
-            throw new InvalidRequestException("존재하지 않는 유저입니다.");
+            throw new InvalidRequestException(ErrorCode.USER_NOT_FOUND);
         }
 
         //해당 사용자의 refresh token을 blacklist에 추가
@@ -145,19 +147,19 @@ public class AuthService {
     public ReissueTokenResponseDto reissueToken(String refreshToken) {
         // 블랙 리스트 검증 (로그아웃된 사용자의 refresh token은 아닌가?_
         if(blackListRepository.existsByRefreshToken(refreshToken)) {
-            throw new InvalidRequestException("로그아웃된 사용자의 Refresh Token입니다.");
+            throw new InvalidRequestException(ErrorCode.LOGGED_OUT_REFRESH_TOKEN);
         }
 
         // DB 검증
         if(!refreshTokenRepository.existsByRefreshToken(refreshToken)) {
-            throw new InvalidRequestException("유효하지 않은 Refresh Token입니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // Access Token 재발급
         Claims claims = jwtUtil.extractClaims(refreshToken);
         Long userId = Long.parseLong(claims.getSubject());
         User foundUser = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("존재하지 않는 사용자입니다.")
+                () -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND)
         );
 
         String reissuedAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getEmail(), foundUser.getUserRole());
