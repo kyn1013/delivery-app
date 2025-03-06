@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -187,12 +187,12 @@ class MenuServiceTest {
     }
 
     private User createMockOwner() {
-        User owner = new User("사장님", UserRole.ROLE_OWNER, "owner@example.com", "password", "서울시 강남구", "010-1111-1111");
+        User owner = new User("사장님", UserRole.ROLE_OWNER, "owner@example.com", "password", "010-1111-1111");
         ReflectionTestUtils.setField(owner, "id", 1L);
         return owner;}
 
     private User createMockAnotherOwner() {
-        User owner = new User("다른가게_사장님", UserRole.ROLE_OWNER, "another_owner@example.com", "password", "서울시 서초구", "098-76-54321", "010-3333-3333");
+        User owner = new User("다른가게_사장님", UserRole.ROLE_OWNER, "another_owner@example.com", "password", "098-76-54321", "010-3333-3333");
         ReflectionTestUtils.setField(owner, "id", 200L);
         return owner;
     }
@@ -202,9 +202,9 @@ class MenuServiceTest {
     }
 
     private Store createMockStore(User owner) {
-        return new Store(1L, "땡땡_치킨", "치킨",
-                LocalDateTime.of(2024, 3, 6, 9, 0),
-                LocalDateTime.of(2024, 3, 6, 22, 0),
+        return new Store("땡땡_치킨", "치킨",
+                LocalTime.of(9, 0),
+                LocalTime.of(22, 0),
                 10000.0, owner);
     }
 }

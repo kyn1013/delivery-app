@@ -1,6 +1,5 @@
 package com.example.deliveryapp.menu.controller;
 import com.example.deliveryapp.auth.entity.AuthUser;
-import com.example.deliveryapp.config.JpaConfig;
 import com.example.deliveryapp.menu.dto.request.MenuRequestDto;
 import com.example.deliveryapp.menu.dto.request.MenuSimpleUpdateRequestDto;
 import com.example.deliveryapp.menu.dto.response.MenuResponseDto;
@@ -10,11 +9,11 @@ import com.example.deliveryapp.menu.enums.MenuStatus;
 import com.example.deliveryapp.menu.service.MenuService;
 import com.example.deliveryapp.user.enums.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -24,6 +23,7 @@ import java.math.BigDecimal;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,19 +41,38 @@ class MenuControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private AuthUser authUser;
+    private Long storeId;
+    private MenuRequestDto menuRequestDto;
+
+    // 공통 데이터 초기화
+    @BeforeEach
+    void 메뉴_컨트롤러_테스트준비() {
+        // given
+        authUser = new AuthUser(1L, "test@example.com", UserRole.ROLE_OWNER);  // 사장 유저 설정
+        storeId = 1L;  // 테스트 스토어 ID 설정
+        menuRequestDto = new MenuRequestDto(
+                "후라이드_치킨",
+                BigDecimal.valueOf(15000),
+                MenuCategory.MAIN,
+                MenuStatus.AVAILABLE,
+                10,
+                "바삭바삭한_후라이드_치킨"
+        ); // 메뉴 생성용 RequestDto 설정
+    }
+
     @Test
     void 메뉴_생성_성공() throws Exception {
         // given
-        MenuRequestDto requestDto = new MenuRequestDto("후라이드_치킨", BigDecimal.valueOf(15000), MenuCategory.MAIN, MenuStatus.AVAILABLE, 10, "바삭바삭한_후라이드_치킨");
         MenuSimpleResponseDto responseDto = new MenuSimpleResponseDto(1L, "후라이드_치킨", BigDecimal.valueOf(15000), MenuCategory.MAIN, 10, "바삭바삭한_후라이드_치킨");
-        AuthUser authUser = new AuthUser(1L, "test@example.com", UserRole.ROLE_OWNER);
 
-        given(menuService.saveMenu(any(MenuRequestDto.class), anyLong(), any(AuthUser.class))).willReturn(responseDto);
+        // 메뉴 생성 서비스 메서드 호출 시 responseDto 반환 설정
+        given(menuService.saveMenu(any(MenuRequestDto.class), eq(storeId), eq(authUser))).willReturn(responseDto);
 
         // when & then
-        mockMvc.perform(post("/api/v1/stores/{storeId}/menus", 1L)
+        mockMvc.perform(post("/api/v1/stores/{storeId}/menus", storeId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(menuRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.menuName").value("후라이드_치킨"))
                 .andExpect(jsonPath("$.price").value(15000))
@@ -64,7 +83,6 @@ class MenuControllerTest {
     @Test
     void 메뉴_목록_조회() throws Exception {
         // given
-        long storeId = 1L;
         MenuSimpleResponseDto responseDto = new MenuSimpleResponseDto(1L, "후라이드_치킨", BigDecimal.valueOf(15000), MenuCategory.MAIN, 10, "바삭바삭한_후라이드_치킨");
         given(menuService.findAvailableMenusByStoreId(storeId)).willReturn(List.of(responseDto));
 
@@ -73,8 +91,7 @@ class MenuControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].menuName").value("후라이드_치킨"))
                 .andExpect(jsonPath("$[0].price").value(15000))
-                .andExpect(jsonPath("$[0].menuCategory").value(MenuCategory.MAIN))
-                .andExpect(jsonPath("$[0].menuStatus").value(MenuStatus.AVAILABLE));
+                .andExpect(jsonPath("$[0].menuCategory").value(equalToIgnoringCase("MAIN")));
     }
 
     @Test
@@ -90,7 +107,7 @@ class MenuControllerTest {
                 "바삭바삭한_후라이드_치킨_수정"
         );
 
-        //업데이트 반영 후
+        //업데이트 후 responseDto
         MenuResponseDto responseDto = new MenuResponseDto(
                 1L,
                 "후라이드_치킨_수정",
@@ -104,11 +121,11 @@ class MenuControllerTest {
                 null   // updatedAt
         );
 
-        // 서비스 메서드가 호출되었을 때 responseDto를 반환하도록 설정
+        // 서비스 메서드 호출 시 responseDto 반환 설정
         given(menuService.updateMenuDetail(any(MenuRequestDto.class), eq(menuId))).willReturn(responseDto);
 
         // when & then
-        mockMvc.perform(put("/api/v1/stores/{storeId}/menus/{menuId}", 1L, menuId)
+        mockMvc.perform(put("/api/v1/stores/{storeId}/menus/{menuId}", storeId, menuId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -128,10 +145,11 @@ class MenuControllerTest {
 
         MenuSimpleResponseDto responseDto = new MenuSimpleResponseDto(1L, "후라이드_치킨", BigDecimal.valueOf(15000), MenuCategory.MAIN, 20, "바삭바삭한_후라이드_치킨");
 
-        given(menuService.updateMenuSimple(eq(requestDto), anyLong())).willReturn(responseDto);
+        // 메뉴 단순 업데이트 메서드 호출 시 responseDto 반환 설정
+        given(menuService.updateMenuSimple(eq(requestDto), eq(menuId))).willReturn(responseDto);
 
         // when & then
-        mockMvc.perform(patch("/api/v1/stores/{storeId}/menus/{menuId}", 1L, menuId)
+        mockMvc.perform(patch("/api/v1/stores/{storeId}/menus/{menuId}", storeId, menuId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -143,12 +161,12 @@ class MenuControllerTest {
     void 메뉴_삭제_성공() throws Exception {
         // given
         long menuId = 1L;
-        AuthUser authUser = new AuthUser(1L, "test@example.com", UserRole.ROLE_OWNER);
 
+        // 메뉴 삭제 메서드 호출 시 아무것도 반환하지 않음
         doNothing().when(menuService).delete(menuId);
 
         // when & then
-        mockMvc.perform(delete("/api/v1/stores/{storeId}/menus/{menuId}", 1L, menuId))
+        mockMvc.perform(delete("/api/v1/stores/{storeId}/menus/{menuId}", storeId, menuId))
                 .andExpect(status().isNoContent());
     }
 }

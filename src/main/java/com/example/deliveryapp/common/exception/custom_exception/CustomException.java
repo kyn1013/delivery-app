@@ -1,5 +1,6 @@
-package com.example.deliveryapp.common.exception.errorcode;
+package com.example.deliveryapp.common.exception.custom_exception;
 
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

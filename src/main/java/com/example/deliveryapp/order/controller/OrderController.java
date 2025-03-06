@@ -2,6 +2,8 @@ package com.example.deliveryapp.order.controller;
 
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.annotation.Auth;
+import com.example.deliveryapp.common.annotation.OwnerUser;
+import com.example.deliveryapp.order.aop.annotaion.OrderRequest;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
 import com.example.deliveryapp.order.service.OrderService;
@@ -22,6 +24,7 @@ public class OrderController {
     /*
      * 주문 등록하기 / 주문 상태 변경 - 손님 : 주문 요청
      */
+    @OrderRequest
     @PostMapping()
     public ResponseEntity<OrderResponseDto> save(@Auth AuthUser authUser){
         OrderResponseDto responseDto = orderService.save(authUser);
@@ -39,6 +42,7 @@ public class OrderController {
 
     /*
      * 주문 다건 조회 (자신이 한 주문)
+     *
      */
     @GetMapping()
     public ResponseEntity<Page<OrderInfoResponseDto>> getOrders(@Auth AuthUser authUser,
@@ -52,7 +56,8 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 손님 : 주문 취소
      */
-    @PatchMapping("/cancel/{orderId}")
+    @OrderRequest
+    @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderInfoResponseDto> cancelOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.cancelOrder(authUser, orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -61,7 +66,8 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 사장님 : 주문 수락
      */
-    @PatchMapping("/accept/{orderId}")
+    @OrderRequest
+    @PatchMapping("/{orderId}/accept")
     public ResponseEntity<OrderInfoResponseDto> acceptOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.acceptOrder(authUser, orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -70,7 +76,8 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 사장님 : 주문 거절
      */
-    @PatchMapping("/reject/{orderId}")
+    @OrderRequest
+    @PatchMapping("/{orderId}/reject")
     public ResponseEntity<OrderInfoResponseDto> rejectOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.rejectOrder(authUser, orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -79,7 +86,8 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 사장님 : 배달중
      */
-    @PatchMapping("/delivering/{orderId}")
+    @OrderRequest
+    @PatchMapping("/{orderId}/delivering")
     public ResponseEntity<OrderInfoResponseDto> deliveringOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.deliveringOrder(authUser, orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -88,7 +96,8 @@ public class OrderController {
     /*
      * 주문 상태 변경 - 사장님 : 배달완료
      */
-    @PatchMapping("/complete/{orderId}")
+    @OrderRequest
+    @PatchMapping("/{orderId}/complete")
     public ResponseEntity<OrderInfoResponseDto> completeOrder(@Auth AuthUser authUser, @PathVariable Long orderId){
         OrderInfoResponseDto responseDto = orderService.completeOrder(authUser, orderId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);

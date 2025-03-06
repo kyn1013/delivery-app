@@ -20,8 +20,10 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    //튜터님 피드백 : 재발급 할 때 액세스 리프레시 둘다 재발급
+
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long ACCESS_TOKEN_TIME = 30 * 60 * 1000L; // 30분
+    private static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L; // 30분
     private static final long REFRESH_TOKEN_TIME = 30L * 24 * 60 * 60 * 1000; // 1달
 
     @Value("${jwt.secret.key}")

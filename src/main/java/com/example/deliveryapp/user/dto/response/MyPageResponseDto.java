@@ -1,12 +1,15 @@
 package com.example.deliveryapp.user.dto.response;
 
 import com.example.deliveryapp.user.enums.UserRole;
+import jakarta.annotation.security.DenyAll;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserResponseDto {
+public class MyPageResponseDto {
+
     private Long id;
 
     private String userName;
@@ -15,6 +18,7 @@ public class UserResponseDto {
 
     private String email;
 
-    private String password;
+    private String phoneNumber;
 
+    private String defaultAddress;
 }

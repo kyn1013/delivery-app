@@ -59,11 +59,22 @@ public class JwtFilter implements Filter {
                 return;
             }
 
-            UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
+            // UserRole의 값을 문자열로 추출해보고 유효한 값인지 검증
+            String userRoleString = claims.get("userRole", String.class);
+            UserRole userRole = null;
+            try{
+                userRole = UserRole.valueOf(userRoleString);
+            }catch (IllegalArgumentException e){
+                log.error("유효하지 않은 UserRole={}", userRoleString);
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 UserRole입니다.");
+                return;
+            }
+
 
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
             httpRequest.setAttribute("userRole", claims.get("userRole"));
+            System.out.println("request에 set 완료");
 
             if (url.startsWith("/api/v1/owner")) {
                 // 사장 권한이 없는 경우 403을 반환합니다.
@@ -86,7 +97,8 @@ public class JwtFilter implements Filter {
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Invalid JWT token, 유효하지 않는 JWT 토큰 입니다.", e);
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않는 JWT 토큰입니다.");
         }
