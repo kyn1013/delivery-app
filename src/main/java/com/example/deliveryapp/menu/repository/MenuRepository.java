@@ -37,11 +37,14 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
             "WHERE m.id = :menuId")
     Menu findByIdWithStore(@Param("menuId") Long menuId);
 
-    boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
+    boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName, MenuStatus status);
 
     void deleteByStore(Store store);
 
     // 비관적인 락을 적용하여 메뉴 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Menu> findByIdWithLock(Long id);
+    @Query("SELECT m FROM Menu m WHERE m.id = :id")
+    Optional<Menu> findByIdWithLock(@Param("id") Long id);
 }
+
+
