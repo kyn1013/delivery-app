@@ -38,4 +38,5 @@ public class Store extends BaseEntity {  // BaseEntity 상속
     @JoinColumn(name = "owner_id")
     private User owner;  // 가게의 주인(사장님)
 
+    private String address;
 }
