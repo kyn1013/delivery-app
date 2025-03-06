@@ -90,4 +90,16 @@ public class Menu extends BaseEntity {
         this.stockQuantity = stockQuantity;
     }
 
+    public void updateSalesAndStock(Long quantity, boolean isCancel){
+        int intQuantity = quantity.intValue();
+
+        if(isCancel){
+            updateStockQuantity(this.stockQuantity + intQuantity);
+            this.salesCount = Math.max(0, this.salesCount - intQuantity); // 주문이 취소되면 재고량 증가, 판매량 감소, 최소 값 0
+        }else {
+            updateStockQuantity(this.stockQuantity - intQuantity);
+            this.salesCount += intQuantity;
+        }
+    }
+
 }

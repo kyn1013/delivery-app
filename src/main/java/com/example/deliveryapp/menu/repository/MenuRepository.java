@@ -3,12 +3,15 @@ package com.example.deliveryapp.menu.repository;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
 import com.example.deliveryapp.store.entity.Store;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
@@ -37,4 +40,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
 
     void deleteByStore(Store store);
+
+    // 비관적인 락을 적용하여 메뉴 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Menu> findByIdWithLock(Long id);
 }

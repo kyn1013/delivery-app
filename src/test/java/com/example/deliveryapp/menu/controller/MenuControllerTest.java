@@ -48,7 +48,6 @@ class MenuControllerTest {
     // 공통 데이터 초기화
     @BeforeEach
     void 메뉴_컨트롤러_테스트준비() {
-        // given
         authUser = new AuthUser(1L, "test@example.com", UserRole.ROLE_OWNER);  // 사장 유저 설정
         storeId = 1L;  // 테스트 스토어 ID 설정
         menuRequestDto = new MenuRequestDto(

@@ -7,6 +7,7 @@ import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestE
 import com.example.deliveryapp.common.exception.custom_exception.ServerException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.menu.entity.Menu;
+import com.example.deliveryapp.menu.repository.MenuRepository;
 import com.example.deliveryapp.order.dto.response.OrderDetailResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
@@ -43,6 +44,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final MenuRepository menuRepository;
 
     @Transactional
     public OrderResponseDto save(AuthUser authUser) {
@@ -50,10 +52,15 @@ public class OrderService {
         isValidCustomer(authUser);
 
         // 사용자 아이디로 장바구니에 있는 목록을 조회해서 첫번째 메뉴를 통해서 가게 아이디를 뽑아옴
-        User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(authUser.getId())
+                .orElseThrow(() -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND));
         List<Cart> carts = cartRepository.findByUserId(authUser.getId());
+
+        // 장바구니가 비어있는지 검증
+        isEmptyCart(carts);
         Long storeId = carts.get(0).getMenu().getStore().getId();
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new InvalidRequestException(ErrorCode.STORE_NOT_FOUND));
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new InvalidRequestException(ErrorCode.STORE_NOT_FOUND));
 
         // 가게 운영시간인지 검증
         isStoreOpenNow(store);
@@ -75,6 +82,13 @@ public class OrderService {
         for(Cart cart : carts){
             OrderDetail orderDetail = new OrderDetail(cart.getMenu(), savedOrder, cart.getQuantity(), cart.getMenu().getPrice());
             orderDetailRepository.save(orderDetail);
+
+            // 비관적 락을 사용하여, 메뉴 조회
+            Menu menu = menuRepository.findByIdWithLock(cart.getMenu().getId())
+                    .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+
+            //판매량 증가 및 재고 수량 업데이트
+            menu.updateSalesAndStock(cart.getQuantity(),false);
         }
 
         // 주문 정보 조회하기
@@ -108,6 +122,12 @@ public class OrderService {
                 .orderDetailResponseDtos(orderDetailResponseDtos)
                 .build();
         return orderResponseDto;
+    }
+
+    private static void isEmptyCart(List<Cart> carts) {
+        if (carts.isEmpty()) {
+            throw new InvalidRequestException(ErrorCode.CART_NOT_FOUND);
+        }
     }
 
     public OrderResponseDto getOrder(AuthUser authUser, Long orderId) {
@@ -152,6 +172,13 @@ public class OrderService {
         // 주문 취소가 가능한 상태인지 검증
         validateOrderCancelable(order);
 
+        // 주문 상세 내역 조회 및 재고/판매량 복구
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        for (OrderDetail orderDetail : orderDetails) {
+            Menu menu = orderDetail.getMenu();
+            menu.updateSalesAndStock(orderDetail.getQuantity(),true);
+        }
+
         order.update(OrderStatus.of(3));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
                 .orderId(order.getId())
@@ -173,6 +200,8 @@ public class OrderService {
         validateOwnerCanChangeOrderStatus(authUser, order);
         // 상태변경이 가능한지 검증
         validateOrderAcceptable(order);
+
+        // 주문 상태 업데이트
         order.update(OrderStatus.of(1));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
                                             .orderId(order.getId())
@@ -194,6 +223,15 @@ public class OrderService {
         validateOwnerCanChangeOrderStatus(authUser, order);
         // 상태변경이 가능한지 검증
         validateOrderRejectable(order);
+
+        // 주문 상세 내역 조회 및 재고/판매량 복구
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        for (OrderDetail orderDetail : orderDetails) {
+            Menu menu = orderDetail.getMenu();
+            menu.updateSalesAndStock(orderDetail.getQuantity(),true);
+        }
+
+        // 주문 상태 업데이트
         order.update(OrderStatus.of(2));
         OrderInfoResponseDto orderInfoResponseDto = OrderInfoResponseDto.builder()
                 .orderId(order.getId())
@@ -376,5 +414,4 @@ public class OrderService {
             throw new ServerException(ErrorCode.INVALID_DELIVERY_COMPLETE_STATE);
         }
     }
-
 }
