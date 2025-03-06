@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
@@ -15,10 +16,11 @@ public class StoreResponseDto {
     private Long id;
     private String businessName;
     private String category;
-    private LocalDateTime openingTime;
-    private LocalDateTime closingTime;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
     private Double minOrderPrice;
     private String ownerUsername;  // 소유자의 username
+    private String address;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -32,6 +34,7 @@ public class StoreResponseDto {
         this.closingTime = store.getClosingTime();
         this.minOrderPrice = store.getMinOrderPrice();
         this.ownerUsername = store.getOwner().getUserName(); // 소유자의 username
+        this.address = store.getAddress();
         this.createdAt = store.getCreatedAt();
         this.updatedAt = store.getUpdatedAt();
     }

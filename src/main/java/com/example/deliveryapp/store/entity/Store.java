@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -26,9 +27,9 @@ public class Store extends BaseEntity {  // BaseEntity 상속
 
     private String category;
 
-    private LocalDateTime openingTime;
+    private LocalTime openingTime;
 
-    private LocalDateTime closingTime;
+    private LocalTime closingTime;
 
 
     private Double minOrderPrice;
@@ -37,4 +38,5 @@ public class Store extends BaseEntity {  // BaseEntity 상속
     @JoinColumn(name = "owner_id")
     private User owner;  // 가게의 주인(사장님)
 
+    private String address;
 }

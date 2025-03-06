@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -16,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "LEFT JOIN FETCH o.store s " +
             "LEFT JOIN FETCH o.user u " +
             "WHERE o.user.id = :userId")
-    Order findByUserId(@Param("userId") Long userId);
+    List<Order> findByUserId(@Param("userId") Long userId);
 
     @Query("SELECT o FROM Order o " +
             "LEFT JOIN FETCH o.store s " +

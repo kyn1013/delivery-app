@@ -85,4 +85,9 @@ public class Menu extends BaseEntity {
     public void delete() {
         this.menuStatus = DELETED;
     }
+
+    public void updateStockQuantity(Integer stockQuantity){
+        this.stockQuantity = stockQuantity;
+    }
+
 }
