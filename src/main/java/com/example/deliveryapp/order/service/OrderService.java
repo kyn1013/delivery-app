@@ -3,6 +3,9 @@ package com.example.deliveryapp.order.service;
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.cart.entity.Cart;
 import com.example.deliveryapp.cart.repository.CartRepository;
+import com.example.deliveryapp.common.exception.custom_exception.InvalidRequestException;
+import com.example.deliveryapp.common.exception.custom_exception.ServerException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.order.dto.response.OrderDetailResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
@@ -45,10 +48,10 @@ public class OrderService {
         isValidCustomer(authUser);
 
         // 사용자 아이디로 장바구니에 있는 목록을 조회해서 첫번째 메뉴를 통해서 가게 아이디를 뽑아옴
-        User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new RuntimeException("데이터가 없습니다"));
+        User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new InvalidRequestException(ErrorCode.USER_NOT_FOUND));
         List<Cart> carts = cartRepository.findByUserId(authUser.getId());
         Long storeId = carts.get(0).getMenu().getStore().getId();
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new RuntimeException("데이터가 없습니다."));
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new InvalidRequestException(ErrorCode.STORE_NOT_FOUND));
 
         // 가게 운영시간인지 검증
         isStoreOpenNow(store);
@@ -245,7 +248,7 @@ public class OrderService {
      */
     private static void isValidCustomer(AuthUser authUser) {
         if (!UserRole.ROLE_CUSTOMER.equals(authUser.getUserRole())){
-            throw new RuntimeException("일반 회원만 가능한 기능입니다");
+            throw new ServerException(ErrorCode.INVALID_MEMBER_ACCESS);
         }
     }
 
@@ -254,7 +257,7 @@ public class OrderService {
      */
     private static void isValidOwner(AuthUser authUser) {
         if (!UserRole.ROLE_OWNER.equals(authUser.getUserRole())){
-            throw new RuntimeException("사장 회원만 가능한 기능입니다");
+            throw new ServerException(ErrorCode.INVALID_OWNER_ACCESS);
         }
     }
 
@@ -264,7 +267,7 @@ public class OrderService {
     private static void validateOrderPrice(BigDecimal totalPrice, Store store) {
         // 총 주문 금액이 최소 주문 금액보다 큰지 검증
         if (totalPrice.compareTo(BigDecimal.valueOf(store.getMinOrderPrice())) < 0)  {
-            throw new RuntimeException("최소주문금액보다 적은 금액은 주문할 수 없습니다.");
+            throw new ServerException(ErrorCode.INVALID_ORDER_AMOUNT);
         }
     }
 
@@ -273,7 +276,7 @@ public class OrderService {
      */
     private static void isStoreOpenNow(Store store) {
         if (!(LocalDateTime.now().isAfter(store.getOpeningTime()) && LocalDateTime.now().isBefore(store.getClosingTime()))) {
-            throw new RuntimeException("운영 시간이 아니므로 주문할 수 없습니다.");
+            throw new ServerException(ErrorCode.INVALID_OPERATING_HOURS);
         }
     }
 
@@ -282,7 +285,7 @@ public class OrderService {
      */
     private static void validateOwnOrderAccess (AuthUser authUser, Order order) {
         if (!authUser.getId().equals(order.getUser().getId())){
-            throw new RuntimeException("자신의 장바구니만 수정할 수 있습니다");
+            throw new ServerException(ErrorCode.UNAUTHORIZED_ORDER_ACCESS);
         }
     }
 
@@ -305,7 +308,7 @@ public class OrderService {
      */
     private static void validateOwnerCanChangeOrderStatus(AuthUser authUser, Order order) {
         if (!authUser.getId().equals(order.getStore().getOwner().getId())){
-            throw new RuntimeException("자신의 가게의 주문만 상태를 변경할 수 있습니다.");
+            throw new ServerException(ErrorCode.INVALID_ORDER_ACCESS);
         }
     }
 
@@ -314,31 +317,31 @@ public class OrderService {
      */
     private static void validateOrderCancelable(Order order) {
         if (!OrderStatus.ORDER_REQUESTED.equals(order.getState())){
-            throw new RuntimeException("주문 요청 상태에서만 취소가 가능합니다.");
+            throw new ServerException(ErrorCode.INVALID_CANCEL_STATE);
         }
     }
 
     private static void validateOrderAcceptable(Order order) {
         if (!OrderStatus.ORDER_REQUESTED.equals(order.getState())){
-            throw new RuntimeException("주문 요청 상태에서만 수락이 가능합니다.");
+            throw new ServerException(ErrorCode.INVALID_ACCEPT_STATE);
         }
     }
 
     private static void validateOrderRejectable(Order order) {
         if (!OrderStatus.ORDER_REQUESTED.equals(order.getState())){
-            throw new RuntimeException("주문 요청 상태에서만 거절이 가능합니다.");
+            throw new ServerException(ErrorCode.INVALID_REJECT_STATE);
         }
     }
 
     private static void validateOrderDeliverable(Order order) {
         if (!OrderStatus.ORDER_ACCEPTED.equals(order.getState())){
-            throw new RuntimeException("주문 수락 상태에서만 배달시작이 가능합니다.");
+            throw new ServerException(ErrorCode.INVALID_DELIVERY_START_STATE);
         }
     }
 
     private static void validateOrderComplete(Order order) {
         if (!OrderStatus.DELIVERING.equals(order.getState())){
-            throw new RuntimeException("배달 중 상태에서만 배달완료가 가능합니다.");
+            throw new ServerException(ErrorCode.INVALID_DELIVERY_COMPLETE_STATE);
         }
     }
 
