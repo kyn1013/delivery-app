@@ -3,6 +3,7 @@ package com.example.deliveryapp.user.controller;
 import com.example.deliveryapp.address.service.AddressService;
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.annotation.Auth;
+import com.example.deliveryapp.user.dto.request.AddAddressRequestDto;
 import com.example.deliveryapp.user.dto.request.ChangeAddressRequestDto;
 import com.example.deliveryapp.user.dto.request.ChangePasswordRequestDto;
 import com.example.deliveryapp.user.dto.request.ChangeUserNameRequestDto;
@@ -57,7 +58,7 @@ public class UserController {
     public ResponseEntity<ChangeAddressResponseDto> changeAddress(
             @Auth AuthUser authUser,
             @PathVariable Long addressId,
-            ChangeAddressRequestDto dto) {
+            @RequestBody ChangeAddressRequestDto dto) {
         ChangeAddressResponseDto changeAddressResponseDto = addressService.changeAddress(authUser.getId(), addressId, dto);
         return ResponseEntity.ok(changeAddressResponseDto);
     }
@@ -74,9 +75,11 @@ public class UserController {
 
     //배송지 추가 (최대 총합이 10개까지)
     @PostMapping("/api/v1/mypage/address")
-    public ResponseEntity<String> addAddress (@Auth AuthUser authUser, String address) {
-        addressService.addAddress(authUser.getId(), address);
-        return ResponseEntity.ok("배송지 추가 성공");
+    public ResponseEntity<AddressResponseDto> addAddress (
+            @Auth AuthUser authUser,
+            @RequestBody AddAddressRequestDto dto) {
+        AddressResponseDto savedAddress = addressService.addAddress(authUser.getId(), dto);
+        return ResponseEntity.ok(savedAddress);
     }
 
     //배송지 삭제
