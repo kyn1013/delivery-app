@@ -6,6 +6,7 @@ import com.example.deliveryapp.cart.dto.request.CartUpdateRequestDto;
 import com.example.deliveryapp.cart.dto.response.CartResponseDto;
 import com.example.deliveryapp.cart.service.CartService;
 import com.example.deliveryapp.common.annotation.Auth;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class CartController {
      * 장바구니 추가
      */
     @PostMapping()
-    public ResponseEntity<CartResponseDto> save(@Auth AuthUser authUser, @RequestBody CartSaveRequestDto requestDto){
+    public ResponseEntity<CartResponseDto> save(@Auth AuthUser authUser, @Valid @RequestBody CartSaveRequestDto requestDto){
         CartResponseDto responseDto = cartService.save(authUser, requestDto);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -45,7 +46,7 @@ public class CartController {
      * 장바구니 수정
      */
     @PatchMapping("/{cartId}")
-    public ResponseEntity<CartResponseDto> update(@Auth AuthUser authUser, @RequestBody CartUpdateRequestDto updateRequestDto, @PathVariable Long cartId) {
+    public ResponseEntity<CartResponseDto> update(@Auth AuthUser authUser, @Valid @RequestBody CartUpdateRequestDto updateRequestDto, @PathVariable Long cartId) {
          CartResponseDto responseDto = cartService.update(authUser, updateRequestDto, cartId);
          return new ResponseEntity<>(responseDto, HttpStatus.OK);
      }

@@ -1,6 +1,5 @@
 package com.example.deliveryapp.menu.repository;
 
-import com.example.deliveryapp.cart.entity.Cart;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +34,5 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     Menu findByIdWithStore(@Param("menuId") Long menuId);
 
     boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
+
 }
