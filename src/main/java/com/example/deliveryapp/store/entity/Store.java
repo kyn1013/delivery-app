@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "store")
 public class Store extends BaseEntity {  // BaseEntity 상속
 
     @Id
