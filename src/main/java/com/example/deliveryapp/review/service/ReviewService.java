@@ -1,6 +1,6 @@
 package com.example.deliveryapp.review.service;
 
-import com.example.deliveryapp.common.exception.errorcode.CustomException;
+import com.example.deliveryapp.common.exception.custom_exception.CustomException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
@@ -9,7 +9,6 @@ import com.example.deliveryapp.review.dto.response.ReviewSaveResponseDto;
 import com.example.deliveryapp.review.dto.response.ReviewUpdateResponseDto;
 import com.example.deliveryapp.review.entity.Review;
 import com.example.deliveryapp.review.repository.ReviewRepository;
-import com.example.deliveryapp.store.repository.StoreRepository;
 import com.example.deliveryapp.user.entity.User;
 import com.example.deliveryapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
