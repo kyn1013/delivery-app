@@ -10,11 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReviewSaveRequestDto {
-
+    @NotNull(message = "상점id는 필수 값입니다.")
     private Long storeId;
-    private Long orderId;
-    private Long userId;
-
     @NotBlank(message = "내용을 입력하세요.")
     private String content;
 

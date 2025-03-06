@@ -9,20 +9,17 @@ public class ReviewUpdateResponseDto {
 
     private final Long id;
     private final Long storeId;
-    private final Long orderId;
     private final int score;
     private final String content;
     private final LocalDateTime updatedAt;
 
     public ReviewUpdateResponseDto(Long id,
                                    Long storeId,
-                                   Long orderId,
                                    int score,
                                    String content,
                                    LocalDateTime updatedAt) {
         this.id = id;
         this.storeId = storeId;
-        this.orderId = orderId;
         this.score = score;
         this.content = content;
         this.updatedAt = updatedAt;

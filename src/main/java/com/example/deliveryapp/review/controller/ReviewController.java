@@ -2,12 +2,16 @@ package com.example.deliveryapp.review.controller;
 
 import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.annotation.Auth;
+import com.example.deliveryapp.common.exception.errorcode.CustomException;
+import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.review.dto.request.ReviewUpdateRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewResponseDto;
 import com.example.deliveryapp.review.dto.request.ReviewSaveRequestDto;
 import com.example.deliveryapp.review.dto.response.ReviewSaveResponseDto;
 import com.example.deliveryapp.review.dto.response.ReviewUpdateResponseDto;
 import com.example.deliveryapp.review.service.ReviewService;
+import com.example.deliveryapp.user.enums.UserRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,32 +25,33 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     // 리뷰 작성
-    @PostMapping("/api/v1/reviews")
+    @PostMapping("/api/v1/orders/{orderId}/reviews")
     public ResponseEntity<ReviewSaveResponseDto> save (
             @Auth AuthUser user, // JWT 토큰 검증
-            @RequestBody ReviewSaveRequestDto dto
+            @PathVariable Long orderId,
+            @Valid @RequestBody ReviewSaveRequestDto dto
     ) {
-        Long userId = user.getId();
-        dto.setUserId(userId);
-        return ResponseEntity.ok(reviewService.save(dto));
+        // ROLE_CUSTOMER만 리뷰 작성 가능
+        if (user.getUserRole() != UserRole.ROLE_CUSTOMER) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+        return ResponseEntity.ok(reviewService.save(user, orderId, dto));
     }
 
     // 리뷰 조회
-    @GetMapping("/api/v1/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> findAll(Long userId, Long storeId, Long orderId) {
-        return ResponseEntity.ok(reviewService.findAll(userId, storeId, orderId ));
+    @GetMapping("/api/v1/stores/{storeId}/reviews")
+    public ResponseEntity<List<ReviewResponseDto>> findAll(@PathVariable Long storeId) {
+        return ResponseEntity.ok(reviewService.findAll(storeId));
     }
 
     // 리뷰 수정
-    @PatchMapping("/api/v1/review/{id}")
+    @PatchMapping("/api/v1/stores/{storeId}/review/{id}")
     public ResponseEntity<ReviewUpdateResponseDto> update (
             @Auth AuthUser user, // JWT 토큰 검증
-            @RequestBody ReviewUpdateRequestDto dto,
             @PathVariable Long id,
-            @PathVariable Long storeId,
-            @PathVariable Long orderId
+            @RequestBody ReviewUpdateRequestDto dto
     ) {
-        return ResponseEntity.ok(reviewService.update(dto, id, user.getId(), store.getId(), order.getId));
+        return ResponseEntity.ok(reviewService.update(user, id, dto));
     }
 
     // 리뷰 삭제

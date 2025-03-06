@@ -1,10 +1,12 @@
 package com.example.deliveryapp.review.entity;
 
+import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.entity.BaseEntity;
 import com.example.deliveryapp.order.entity.Order;
 import com.example.deliveryapp.store.entity.Store;
 import com.example.deliveryapp.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +28,7 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
@@ -37,8 +39,9 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Builder
     public Review(User user,
-                  Store store,
+            Store store,
                   Order order,
                   int score,
                   String content) {

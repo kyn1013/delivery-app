@@ -1,5 +1,6 @@
 package com.example.deliveryapp.review.service;
 
+import com.example.deliveryapp.auth.entity.AuthUser;
 import com.example.deliveryapp.common.exception.errorcode.CustomException;
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.order.entity.Order;
@@ -19,12 +20,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.deliveryapp.order.enums.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.deliveryapp.common.exception.errorcode.ErrorCode.INVALID_INPUT_VALUE;
+import static com.example.deliveryapp.common.exception.errorcode.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,30 +38,29 @@ public class ReviewService {
     private final StoreRepository storeRepository; //가게 정보 가져오기 위함
 
     @Transactional
-    public ReviewSaveResponseDto save(ReviewSaveRequestDto dto) {
-        Long userId = dto.getUserId();
+    public ReviewSaveResponseDto save(AuthUser user, Long orderId, ReviewSaveRequestDto dto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User Currentuser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        Long orderId = dto.getOrderId();
         Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+                    .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
 
-        Long storeId = dto.getStoreId();
-        Store store = storeRepository.findById(storeId)
-                    .orElseThrow(() -> new CustomException(INVALID_INPUT_VALUE));
+        Store store = storeRepository.findById(dto.getStoreId())
+                    .orElseThrow(() -> new CustomException(STORE_NOT_FOUND));
 
             // 주문 상태 체크: 완료된 주문만 리뷰 작성 가능
-           if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
-                throw new IllegalStateException("배달 완료된 주문만 리뷰를 작성할 수 있습니다.");
-            }
-        Review review = new Review(user,
-                store,
-                order,
-                dto.getScore(),
-                dto.getContent()
-                );
+        if (!order.getState().isReviewable()) {
+            throw new CustomException(ErrorCode.ORDER_NOT_REVIEWABLE);
+        }
+        Review review = Review.builder()
+                .user(Currentuser)
+                .store(store)
+                .order(order)
+                .content(dto.getContent())
+                .score(dto.getScore())
+                .build();
+
         Review savedReview = reviewRepository.save(review);
 
         return new ReviewSaveResponseDto(
@@ -75,7 +76,7 @@ public class ReviewService {
 
     // 리뷰 조회
     @Transactional(readOnly = false)
-    public List<ReviewResponseDto> findAll() {
+    public List<ReviewResponseDto> findAll(Long storeId) {
         // 리뷰 최신순으로 정렬
 
         List<Review> reviews = reviewRepository.findAll(Sort.by(Sort.Order.desc("createdAt")));
@@ -83,10 +84,9 @@ public class ReviewService {
         List<ReviewResponseDto> dtos = new ArrayList<>();
 
         for (Review review : reviews) {
-            ReviewResponseDto dto = new ReviewResponseDto(review.getId(),
+            ReviewResponseDto dto = new ReviewResponseDto(
+                    review.getId(),
                    review.getUser().getId(),
-                   review.getStore().getId(),
-                   review.getOrder().getId(),
                     review.getScore(),
                     review.getContent(),
                     review.getCreatedAt(),
@@ -99,20 +99,20 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewUpdateResponseDto update(Long storeId, Long orderId, ReviewUpdateRequestDto dto, Long id, Long userId) {
+    public ReviewUpdateResponseDto update(AuthUser user, Long reviewId, ReviewUpdateRequestDto dto) {
         // 리뷰 존재 여부 확인
-        Review review = reviewRepository.findById(id)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         //작성자 검증
-        if (!review.getUser().getId().equals(userId)) {
+        if (!review.getUser().getId().equals(user)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_REVIEW_UPDATE);
         }
 
         review.update(dto.getContent(), dto.getScore());
-        return  new ReviewUpdateResponseDto(review.getId(),
+        return  new ReviewUpdateResponseDto(
+                review.getId(),
                 review.getStore().getId(),
-                review.getOrder().getId(),
                 review.getScore(),
                 review.getContent(),
                 review.getUpdatedAt()
