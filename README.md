@@ -13,7 +13,7 @@
 ## 주문(Order) API
 
 | HTTP Method | 기능 | 엔드포인트 | 인증 | 요청 예시 | 응답 예시 | 성공 코드 | 실패 코드 |
-|-------------|-------------|---------------------|-------------|--------------------------------------------------|--------------------------------------------------|----------|----------|
+|-------------|-----------------|---------------|-------------|--------------------------------------------------|--------------------------------------------------|----------|----------|
 | POST | 주문 등록 | `/api/v1/orders` | JWT 토큰 | `{ "orderId": Long, "orderNumber": String, "memberName": String, "storeName": String, "state": String, "totalPrice": Double, "orderDetailResponseDtos": [{ "orderId": Long, "menuId": Long, "menuName": String, "quantity": Integer, "price": Double }] }` | `{ "orderId": Long, "orderNumber": String, "memberName": String, "storeName": String, "state": String, "totalPrice": Double, "orderDetailResponseDtos": [...] }` | 200 | 400, 403, 404 |
 | GET | 주문 단건 조회 | `/api/v1/orders/{orderId}` | JWT 토큰 | - | `{ "orderId": Long, "orderNumber": String, "memberName": String, "storeName": String, "state": String, "totalPrice": Double, "orderDetailResponseDtos": [...] }` | 200 | 400, 403, 404 |
 | GET | 주문 전체 조회 (자신이 한 주문) | `/api/v1/orders` | JWT 토큰 | - | `{ "content": [{ "orderId": Long, "orderNumber": String, "memberName": String, "storeName": String, "state": String, "totalPrice": Double }], "page": { "size": Integer, "number": Integer, "totalElements": Long, "totalPages": Integer } }` | 200 | 400, 403, 404 |
@@ -26,7 +26,7 @@
 ## 장바구니(Cart) API
 
 | HTTP Method | 기능 | 엔드포인트 | 인증 | 요청 예시 | 응답 예시 | 성공 코드 | 실패 코드 |
-|-------------|-------------|---------------------|-------------|--------------------------------------------------|--------------------------------------------------|----------|----------|
+|-------------|-----------------|---------------|-------------|--------------------------------------------------|--------------------------------------------------|----------|----------|
 | POST | 장바구니 추가 | `/api/v1/carts` | JWT 토큰 (일반 사용자) | `{ "menuId": Long, "quantity": Long }` | `{ "cartId": Long, "menuId": Long, "menuName": String, "memberId": Long, "memberName": String, "quantity": Long }` | 200 | 400, 403, 404 |
 | GET | 장바구니 목록 조회 | `/api/v1/carts` | JWT 토큰 (일반 사용자) | - | `{ "content": [{ "cartId": Long, "menuId": Long, "menuName": String, "memberId": Long, "memberName": String, "quantity": Long }], "page": { "size": Long, "number": Long, "totalElements": Long, "totalPages": Long } }` | 200 | 400, 403, 404 |
 | PATCH | 장바구니 수정 | `/api/v1/carts/{cartId}` | JWT 토큰 (일반 사용자) | `{ "menuId": Long, "quantity": Long }` | `{ "cartId": Long, "menuId": Long, "menuName": String, "memberId": Long, "memberName": String, "quantity": Long }` | 200 | 400, 403, 404 |
