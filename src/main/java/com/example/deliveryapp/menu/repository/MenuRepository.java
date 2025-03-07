@@ -3,12 +3,17 @@ package com.example.deliveryapp.menu.repository;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
 import com.example.deliveryapp.store.entity.Store;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
@@ -34,7 +39,14 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
             "WHERE m.id = :menuId")
     Menu findByIdWithStore(@Param("menuId") Long menuId);
 
-    boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName,MenuStatus status);
+    boolean existsByStoreIdAndMenuNameAndMenuStatusNot(Long storeId, String menuName, MenuStatus status);
 
     void deleteByStore(Store store);
+
+    // 비관적인 락을 적용하여 메뉴 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")}) // 5초 타임아웃 설정, 5초 동안 락 대기,
+    Optional<Menu> findById(Long id);
 }
+
+
