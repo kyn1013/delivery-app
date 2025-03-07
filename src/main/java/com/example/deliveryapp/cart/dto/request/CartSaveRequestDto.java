@@ -2,9 +2,12 @@ package com.example.deliveryapp.cart.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 public class CartSaveRequestDto {
 
     @NotNull(message = "수량은 필수 입력값입니다.")
