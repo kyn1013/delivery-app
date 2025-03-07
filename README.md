@@ -1,7 +1,7 @@
 ![image](https://github.com/user-attachments/assets/5505dec7-9cf3-4966-bc54-f35ed1c0f721)
 
 ## 메뉴 관리
-* 메뉴 추가 기능 :
+* 메뉴를 추가하는 기능
 
 * 주문을 위한 가게 메뉴 조회 기능
 
