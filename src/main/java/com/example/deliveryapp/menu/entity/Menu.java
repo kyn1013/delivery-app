@@ -63,6 +63,17 @@ public class Menu extends BaseEntity {
         this.description = description;
     }
 
+    public Menu(String menuName, BigDecimal price, MenuCategory menuCategory,
+                MenuStatus menuStatus, Integer stockQuantity, String description, Store store) {
+        this.menuName = menuName;
+        this.price = price;
+        this.menuCategory = menuCategory;
+        this.menuStatus = menuStatus;
+        this.stockQuantity = stockQuantity;
+        this.description = description;
+        this.store = store;
+    }
+
     public void simpleUpdate(MenuStatus menuStatus, Integer stockQuantity) {
         if (menuStatus != null && !menuStatus.equals(this.menuStatus)) {
             this.menuStatus = menuStatus;
