@@ -8,6 +8,7 @@ import com.example.deliveryapp.common.exception.custom_exception.ServerException
 import com.example.deliveryapp.common.exception.errorcode.ErrorCode;
 import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.repository.MenuRepository;
+import com.example.deliveryapp.menu.service.MenuService;
 import com.example.deliveryapp.order.dto.response.OrderDetailResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderInfoResponseDto;
 import com.example.deliveryapp.order.dto.response.OrderResponseDto;
@@ -44,7 +45,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
-    private final MenuRepository menuRepository;
+    private final MenuService menuService;
 
     @Transactional
     public OrderResponseDto save(AuthUser authUser) {
@@ -84,8 +85,7 @@ public class OrderService {
             orderDetailRepository.save(orderDetail);
 
             // 비관적 락을 사용하여, 메뉴 조회
-            Menu menu = menuRepository.findByIdWithLock(cart.getMenu().getId())
-                    .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+            Menu menu = menuService.findMenuWithLock(cart.getMenu().getId());
 
             //판매량 증가 및 재고 수량 업데이트
             menu.updateSalesAndStock(cart.getQuantity(),false);

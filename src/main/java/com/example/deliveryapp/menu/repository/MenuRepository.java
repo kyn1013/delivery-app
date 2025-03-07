@@ -4,9 +4,11 @@ import com.example.deliveryapp.menu.entity.Menu;
 import com.example.deliveryapp.menu.enums.MenuStatus;
 import com.example.deliveryapp.store.entity.Store;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -43,8 +45,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     // 비관적인 락을 적용하여 메뉴 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT m FROM Menu m WHERE m.id = :id")
-    Optional<Menu> findByIdWithLock(@Param("id") Long id);
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")}) // 5초 타임아웃 설정, 5초 동안 락 대기,
+    Optional<Menu> findById(Long id);
 }
 
 

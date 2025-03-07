@@ -12,6 +12,7 @@ import com.example.deliveryapp.menu.repository.MenuRepository;
 import com.example.deliveryapp.store.entity.Store;
 import com.example.deliveryapp.store.repository.StoreRepository;
 import com.example.deliveryapp.user.enums.UserRole;
+import jakarta.persistence.LockTimeoutException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,10 @@ public class MenuService {
         return MenuSimpleResponseDto.toDto(savedMenu);
     }
 
+    // 락 사용하는 조회 메서드
+
+
+
     // 가게 메뉴 페이지 to 클라이언트
     @Transactional(readOnly = true)
     public List<MenuSimpleResponseDto> findAvailableMenusByStoreId(Long storeId) {
@@ -75,6 +80,18 @@ public class MenuService {
         List<Menu> menus = menuRepository.findByStoreIdOrderByCategory(storeId);
         return menus.stream().map(MenuResponseDto::toDto)
                 .collect(Collectors.toList());
+    }
+
+    // 비관적 락 적용 조회
+    @Transactional
+    public Menu findMenuWithLock(Long id) {
+        try {
+            return menuRepository.findById(id).orElseThrow(
+                    () -> new IllegalArgumentException("Menu not found")
+            );
+        } catch (LockTimeoutException e) {
+            throw new LockTimeoutException("메뉴 조회 대기시간 초과",e);
+        }
     }
 
     @Transactional
